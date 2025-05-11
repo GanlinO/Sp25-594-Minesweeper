@@ -109,6 +109,25 @@ public class Model implements ControllerToModel{
 		}
 	}
 
+	// If user wants to play a custom game, change rows
+	public void setCustomRows(int rows){
+		if(rows>=2 && rows<=30)
+			customRows = rows;
+	}
+	
+	// If user wants to play a custom game, change cols
+	public void setCustomColumns(int cols){
+		if(cols>=2 && cols<=30)
+			customCols = cols;
+	}
+	
+	// If user wants to play a custom game, change mines
+	public void setCustomMines(int mines){
+		if(mines>=1 && mines<=150)
+			customMines = mines;
+	}
+
+
 
 
 	
