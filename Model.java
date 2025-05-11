@@ -325,6 +325,227 @@ public class Model implements ControllerToModel{
 		}
 	}
 
+	// Returns 1 if tile at (row, col) is a mine, 0 otherwise
+	private int isMine(int row, int col)
+	{
+		if(actualGrid==null)
+			System.exit(NULL_EXIT_CODE);
+		if(actualGrid[row][col].equals(MINE))
+			return 1;
+		else
+			return 0;
+	}
+	
+	// If flagged == true, tile at (row, col) has been flagged; if false, unflagged
+	public void tileFlagged(boolean flagged,int row, int col)
+	{
+		if(flaggedTiles==null)
+			System.exit(NULL_EXIT_CODE);
+		flaggedTiles[row][col] = flagged;
+	}
+	
+	public ArrayList<String> getDifficulties()
+	{
+		if(DIFFICULTIES==null)
+			System.exit(NULL_EXIT_CODE);
+		return DIFFICULTIES;
+	}
+	
+	// Returns true if player lost, false otherwise
+	public boolean playerLost()
+	{
+		return lost;
+	}
+	
+	// Returns true if player won, false otherwise
+	// need playerLost and playerWon b/c the player could do either
+	// or neither (not both)
+	public boolean playerWon()
+	{
+		return won;
+	}
+	
+	public long getTotalGamesPlayed()
+	{
+		return gamesPlayed;
+	}
+	
+	public long getTotalGamesWon()
+	{
+		return gamesWon;
+	}
+	
+	// Returns true if tile at (row, col) is a mine that was previously hit
+	private boolean minePreviouslyHit(int row, int col)
+	{
+		if(minesHit==null)
+			System.exit(NULL_EXIT_CODE);
+		if( (minesHit[0][0] == row && minesHit[0][1] == col) ||
+				(minesHit[1][0]==row && minesHit[1][1]==col) ||
+				(minesHit[2][0]==row && minesHit[2][1]==col) )
+			return true;
+		else
+			return false;
+	}
+	
+	// A tile was chosen at (row, col) at currentTime
+	// fill in the tiles based on what was pressed
+	// if the player won, update gamesWon and the best time
+	// return exposedTiles
+	public boolean [][] tilePressed(int row, int col, long currentTime)
+	{
+		if(exposedTiles==null)
+			System.exit(NULL_EXIT_CODE);
+		fillOutTiles(true,row,col);
+		if(won)
+		{
+			gamesWon += 1;
+			switch(difficultyIndex)
+			{
+			case 0:
+				if(bestTimeSecondsBeg>currentTime || bestTimeSecondsBeg == 0)
+					bestTimeSecondsBeg = currentTime;
+				break;
+			case 1:
+				if(bestTimeSecondsInter>currentTime || bestTimeSecondsInter == 0)
+					bestTimeSecondsInter = currentTime;
+				break;
+			case 2:
+				if(bestTimeSecondsExpert>currentTime || bestTimeSecondsExpert == 0)
+					bestTimeSecondsExpert = currentTime;
+				break;
+			//custom
+			default:
+				if(bestTimeSecondsCustom>currentTime || bestTimeSecondsCustom == 0)
+					bestTimeSecondsCustom = currentTime;
+				break;
+			}
+			
+		}
+		return exposedTiles;
+	}
+	
+	// Tile needs to be filled in at (row, col)
+	// playerPressed is true if player pressed a button to fill out tiles
+	// false if auto filling out tiles
+	private void fillOutTiles(boolean playerPressed,int row, int col)
+	{
+		if(timesNumberPressed==null||minesHit==null||lastpressed==null||
+				exposedTiles==null||flaggedTiles==null||actualGrid==null)
+			System.exit(NULL_EXIT_CODE);
+		if(playerPressed)
+		{
+			lastpressed[0] = row;
+			lastpressed[1] = col;
+		}
+		String numbers = "12345678";
+		if(row<0||col<0||row>numberRows-1||col>numberCols-1)
+			return;
+		if(exposedTiles[row][col] == true && !numbers.contains(actualGrid[row][col]))
+			return;
+		
+		exposedTiles[row][col] = true;
+		
+		if(isMine(row,col)==1 && flaggedTiles[row][col]==false){ // The tile is a mine and has not been flagged
+		// If auto complete presses the mine, flag was incorrect and it is still player's fault
+			if(extraLivesLeft>0)
+			{
+				extraLivesLeft=extraLivesLeft-1;
+				minesHit[extraLivesLeft][0] = row;
+				minesHit[extraLivesLeft][1] = col;
+				if(!playerPressed) // Player placed incorrect flag and tried to autocomplete
+				{
+					lastpressed[0] = row; // Makes lastpressed the position of the mine that was revealed
+					lastpressed[1] = col;
+				}
+			}
+			else
+			{
+				lost = true;
+				if(!playerPressed)
+				{
+					lastpressed[0] = row;
+					lastpressed[1] = col;
+				}
+			}
+			
+		}
+		else if(actualGrid[row][col].equals(EMPTY))
+		{
+			// Fill out all surrounding tiles if this is an empty tile
+			for(int i = 0;i<3;i++)
+			{
+				fillOutTiles(false,row+1,col-1+i);
+				fillOutTiles(false,row,col-1+i);
+				fillOutTiles(false,row-1,col-1+i);
+			}
+		}
+		else if(numbers.contains(actualGrid[row][col])) // If this is a number
+		{
+			if(timesNumberPressed[row][col]==0) //Initial hit no action
+				timesNumberPressed[row][col]=1;
+			
+			// Hit again, display surrounding tiles if all "mines" flagged (corresponding to numMines)
+			else if(timesNumberPressed[row][col]==1 && playerPressed)
+			{
+				int numMines = getNumberOfMines(row,col);
+				int currentFlaggedOrHitMines = 0;
+				for(int i = 0;i<3;i++)
+				{
+					// If mine is flagged or hit - not care if it is actually a mine (&& isMine(row+1,col-1+i)==1)
+					if(row+1<numberRows && col-1+i<numberCols &&
+							col-1+i>=0 && (flaggedTiles[row+1][col-1+i]==true || minePreviouslyHit(row+1,col-1+i)))
+					{
+						currentFlaggedOrHitMines++;
+					}
+					if(row-1>=0 && col-1+i<numberCols &&
+							col-1+i>=0 && (flaggedTiles[row-1][col-1+i]==true || minePreviouslyHit(row-1,col-1+i)))
+					{
+						currentFlaggedOrHitMines++;
+					}
+					if(col-1+i<numberCols && col-1+i>=0 && i!=1 &&
+							(flaggedTiles[row][col-1+i]==true || minePreviouslyHit(row,col-1+i))) 
+	
+					{
+						currentFlaggedOrHitMines++;				
+					}
+				}
+				
+				// Displays all surrounding tiles if all "mines" flagged
+				if(currentFlaggedOrHitMines>=numMines){
+					for(int i = 0;i<3;i++){
+						// Fills out all surrounding tiles
+						fillOutTiles(false,row+1,col-1+i);
+						fillOutTiles(false,row,col-1+i);
+						fillOutTiles(false,row-1,col-1+i);
+					}
+				}
+					
+			}
+		}
+		
+		won = allTilesFilledOut();
+	}
+	
+	// Returs true if user has won, false otherwise
+	private boolean allTilesFilledOut()
+	{
+		if(exposedTiles==null||flaggedTiles==null)
+			System.exit(NULL_EXIT_CODE);
+		for(int i = 0; i<numberRows;i++){
+			for(int j = 0;j<numberCols;j++){
+			    // If the tile is not exposed 
+				if(exposedTiles[i][j]==false){
+				 	// If it is not a flagged mine, return false
+					if(flaggedTiles[i][j]==false && isMine(i,j)==0)
+						return false;
+				}
+			}
+		}
+		return true;
+	}
+
+
 
 
 
