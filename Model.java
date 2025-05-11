@@ -52,8 +52,7 @@ public class Model implements ControllerToModel{
 	
 	// Random generator for the tile grid
 	private Random randgen;
-
-	// Initialize a model to play the game
+	
 	public Model(){
 		randgen = new Random(System.currentTimeMillis());
 		numberMines = BEGINNERMINES;
@@ -74,8 +73,7 @@ public class Model implements ControllerToModel{
 		minesHit[1][0] = lastpressed[0];  minesHit[1][1] = lastpressed[1];
 		minesHit[2][0] = lastpressed[0];  minesHit[2][1] = lastpressed[1];
 	}
-
-	// Set difficulty level
+	
 	public void setDifficulty(String diff){
 		if(diff==null)
 			System.exit(NULL_EXIT_CODE);
@@ -108,7 +106,7 @@ public class Model implements ControllerToModel{
 			throw new IllegalArgumentException("Difficulty not correct!");
 		}
 	}
-
+	
 	// If user wants to play a custom game, change rows
 	public void setCustomRows(int rows){
 		if(rows>=2 && rows<=30)
@@ -126,7 +124,7 @@ public class Model implements ControllerToModel{
 		if(mines>=1 && mines<=150)
 			customMines = mines;
 	}
-
+	
 	// Resets game data to play another game
 	public void resetGame(){
 		gamesPlayed += 1;
@@ -158,7 +156,7 @@ public class Model implements ControllerToModel{
 		customRows = 9;
 		customCols = 9;
 	}
-
+	
 	public int getNumMines(){
 		return numberMines;
 	}
@@ -174,13 +172,13 @@ public class Model implements ControllerToModel{
 			System.exit(NULL_EXIT_CODE);
 		return lastpressed;
 	}
-
+	
 	// If user wants to change the number of extra lives
 	public void setExtraLives(int lives){
 		if(extraLivesLeft<=3 && extraLivesLeft>=-1)
 			extraLivesLeft = lives;
 	}
-
+	
 	public String getBestTimes(){
 		String str = "";
 		if(difficultyIndex == 0 || bestTimeSecondsBeg>0)
@@ -204,7 +202,7 @@ public class Model implements ControllerToModel{
 			System.exit(NULL_EXIT_CODE);
 		return actualGrid;
 	}
-
+	
 	public boolean startGame(){
 		if(numberRows>=2 && numberRows<=30 && numberCols<=30 &&
 				numberCols>=2 && numberMines>=1 && numberMines<=150
@@ -324,7 +322,7 @@ public class Model implements ControllerToModel{
 					isMine(row+1,col-1)+isMine(row+1,col)+isMine(row+1,col+1);
 		}
 	}
-
+	
 	// Returns 1 if tile at (row, col) is a mine, 0 otherwise
 	private int isMine(int row, int col)
 	{
@@ -544,12 +542,4 @@ public class Model implements ControllerToModel{
 		}
 		return true;
 	}
-
-
-
-
-
-
-
-	
 }
