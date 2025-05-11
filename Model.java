@@ -205,6 +205,127 @@ public class Model implements ControllerToModel{
 		return actualGrid;
 	}
 
+	public boolean startGame(){
+		if(numberRows>=2 && numberRows<=30 && numberCols<=30 &&
+				numberCols>=2 && numberMines>=1 && numberMines<=150
+				&& (numberRows*numberCols)>numberMines){
+			timesNumberPressed = new int [numberRows][numberCols];
+			for(int i=0; i<numberRows;i++)
+				for(int j=0;j<numberCols;j++)
+					timesNumberPressed[i][j] = 0;
+			
+			flaggedTiles = new boolean [numberRows][numberCols];
+			for(int i=0; i<numberRows;i++)
+				for(int j=0;j<numberCols;j++)
+					flaggedTiles[i][j] = false;
+			
+			// Sets default for all tiles to be not exposed
+			exposedTiles = new boolean[numberRows][numberCols];
+			for(int i=0; i<numberRows;i++)
+				for(int j=0;j<numberCols;j++)
+					exposedTiles[i][j] = false;
+	
+			// Populates grid with mines in unique locations
+			populateGridWithMines();
+			
+			// Populates grid with numbers relating to mines
+			populateGridNumbers();
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	// Populates grid with mines in unique locations
+	private void populateGridWithMines(){
+		actualGrid = new String[numberRows][numberCols];
+		for(int i=0;i<numberRows;i++)
+			for(int j=0;j<numberCols;j++)
+				actualGrid[i][j] = EMPTY;
+		
+		mineLocations = new int[2][numberMines];
+		int curRow;
+		int curCol;
+		for(int i=0;i<numberMines;i++){
+			boolean found;
+			do{
+				found = false;
+
+				curRow = randgen.nextInt(numberRows);
+				curCol = randgen.nextInt(numberCols);
+
+				for(int j = 0;j<i;j++){
+					if(curRow==mineLocations[0][j] && curCol==mineLocations[1][j])
+					{
+						found = true;
+						break;
+					}
+				}
+			} while(found);
+			mineLocations[0][i] = curRow;
+			mineLocations[1][i] = curCol;
+			actualGrid[curRow][curCol] = MINE;
+		}
+		
+	}
+	
+	// Once mines are set in the grid, put in the numbers corresponding to
+	// the number of mines around that tile
+	private void populateGridNumbers(){
+		if(actualGrid==null)
+			System.exit(NULL_EXIT_CODE);
+		for(int i =0;i<numberRows;i++){
+			for(int j=0; j<numberCols;j++){
+				if(!actualGrid[i][j].equals(MINE)){
+					//each tile either empty or mine so far
+					int num = getNumberOfMines(i,j);
+					if(num>0)
+						actualGrid[i][j] = ""+num;		
+				}
+			}
+		}
+	}
+	
+	// Given the tile coordinate, return the number of mines around it
+	private int getNumberOfMines(int row, int col){
+		if(row==0) 
+		{
+			if(col==0)
+				return isMine(0,1)+isMine(1,1)+isMine(1,0);
+			else if(col==numberCols-1) 
+				return isMine(0,numberCols-2)+isMine(1,numberCols-2)+isMine(1,numberCols-1);
+			else 
+				return isMine(0,col-1)+isMine(0,col+1)+isMine(1,col-1)+
+						isMine(1,col)+isMine(1,col+1);
+		}
+		else if(row==numberRows-1)
+		{
+			if(col==0)
+				return isMine(numberRows-2,0)+isMine(numberRows-2,1)+isMine(numberRows-1,1);
+			else if(col==numberCols-1)
+				return isMine(numberRows-2,numberCols-1)+isMine(numberRows-2,numberCols-2)+
+						isMine(numberRows-1,numberCols-2);
+			else
+				return isMine(numberRows-1,col-1)+isMine(numberRows-1,col+1)+
+						isMine(numberRows-2,col-1)+
+						isMine(numberRows-2,col)+isMine(numberRows-2,col+1);
+		}
+		else if(col==0) 
+			return isMine(row-1,col)+isMine(row+1,col)+isMine(row-1,col+1)+
+					isMine(row,col+1)+isMine(row+1,col+1);
+		else if(col == numberCols-1)
+			return isMine(row-1,numberCols-1)+isMine(row+1,numberCols-1)+
+					isMine(row-1,numberCols-2)+
+					isMine(row,numberCols-2)+isMine(row+1,numberCols-2);
+		else
+		{
+			return isMine(row-1,col-1)+isMine(row-1,col)+isMine(row-1,col+1)+
+					isMine(row,col-1)+isMine(row,col+1)+
+					isMine(row+1,col-1)+isMine(row+1,col)+isMine(row+1,col+1);
+		}
+	}
+
+
 
 
 
