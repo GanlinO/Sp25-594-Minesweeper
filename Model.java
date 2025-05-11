@@ -159,11 +159,21 @@ public class Model implements ControllerToModel{
 		customCols = 9;
 	}
 
-
-
-
-
+	public int getNumMines(){
+		return numberMines;
+	}
 	
+	public boolean [][] getExposed(){
+		if(exposedTiles==null)
+			System.exit(NULL_EXIT_CODE);
+		return exposedTiles;
+	}
+	
+	public int[] getLastPressed(){
+		if(lastpressed==null)
+			System.exit(NULL_EXIT_CODE);
+		return lastpressed;
+	}
 
 
 
