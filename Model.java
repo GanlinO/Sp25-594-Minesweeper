@@ -52,4 +52,68 @@ public class Model implements ControllerToModel{
 	
 	// Random generator for the tile grid
 	private Random randgen;
+
+	// Initialize a model to play the game
+	public Model(){
+		randgen = new Random(System.currentTimeMillis());
+		numberMines = BEGINNERMINES;
+		numberRows = 9;
+		numberCols = 9;
+		difficultyIndex = 0;
+		
+		won = false;
+		lost = false;
+		
+		lastpressed = new int[2];
+		lastpressed[0] = -1;
+		lastpressed[1] = -1;
+		extraLivesLeft = -1;
+		
+		minesHit = new int[3][2];
+		minesHit[0][0] = lastpressed[0];  minesHit[0][1] = lastpressed[1];
+		minesHit[1][0] = lastpressed[0];  minesHit[1][1] = lastpressed[1];
+		minesHit[2][0] = lastpressed[0];  minesHit[2][1] = lastpressed[1];
+	}
+
+	// Set difficulty level
+	public void setDifficulty(String diff){
+		if(diff==null)
+			System.exit(NULL_EXIT_CODE);
+		switch(diff){
+		case "beginner":
+			numberMines = BEGINNERMINES;
+			numberRows = 9;
+			numberCols = 9;
+			difficultyIndex = 0;
+			break;
+		case "intermediate":
+			numberMines = INTERMEDIATEMINES;
+			numberRows = 16;
+			numberCols = 16;
+			difficultyIndex = 1;
+			break;
+		case "expert":
+			numberMines = EXPERTMINES;
+			numberRows = 16;
+			numberCols = 30;
+			difficultyIndex = 2;
+			break;
+		case "custom":
+			numberMines = customMines;
+			numberRows = customRows;
+			numberCols = customCols;
+			difficultyIndex = 3;
+			break;
+		default:
+			throw new IllegalArgumentException("Difficulty not correct!");
+		}
+	}
+
+
+
+	
+
+
+
+	
 }
