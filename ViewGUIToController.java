@@ -26,5 +26,6 @@ public interface ViewGUIToController {
     public long getTotalGamesWon();
     public long getTotalGamesPlayed();
     public String getBestTime();
+    public int[] getHint(); // New method for providing hints
 }
 
