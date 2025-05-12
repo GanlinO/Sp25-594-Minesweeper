@@ -21,3 +21,9 @@ public class Controller implements ViewGUIToController {
 			System.exit(NULL_EXIT_CODE);
 		myView.go(myModel.getDifficulties());
 	}
+	// Instructs the model to set the current game difficulty to the specified value.
+	public void setDifficulty(String difficulty) {
+		if(myModel == null)
+			System.exit(NULL_EXIT_CODE);
+		myModel.setDifficulty(difficulty);
+	}
