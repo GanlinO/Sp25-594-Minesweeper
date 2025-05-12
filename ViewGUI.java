@@ -255,3 +255,23 @@ public class ViewGUI implements ControllerToViewGUI{
         return myController.getExtraLivesLeft();
     }
 }
+
+    /**
+     * Called when the user requests a hint
+     * Gets hint from the controller and displays it in the game frame
+     */
+    public void requestHint() {
+        if(myController == null || gameframe == null)
+            System.exit(NULL_EXIT_CODE);
+
+        int[] hint = myController.getHint();
+
+        if(hint != null) {
+            // Show hint in the game frame
+            gameframe.highlightHintCell(hint[0], hint[1], false);
+            createPopUp("Hint: Try the highlighted cell at row " + (hint[0]+1) + ", column " + (hint[1]+1), 400, 150, true);
+        } else {
+            createPopUp("No logical hint available. Try using some strategy!", 400, 150, true);
+        }
+    }
+}
