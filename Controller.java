@@ -206,5 +206,16 @@ public class Controller implements ViewGUIToController{
         return myModel.RULES;
     }
 
+    /*  Hint feature  */
+    public int[] applyHint() {
+        if (myModel == null) System.exit(NULL_EXIT_CODE);
+        return myModel.applyHint();
+    }
+
+    public int getNumFlags() {
+        if (myModel == null) System.exit(NULL_EXIT_CODE);
+        return myModel.getNumFlags();
+    }
+
 }
 

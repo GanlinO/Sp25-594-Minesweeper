@@ -26,5 +26,12 @@ public interface ViewGUIToController {
     public long getTotalGamesWon();
     public long getTotalGamesPlayed();
     public String getBestTime();
+    /*  Hint feature  */
+    /** Flags the mine that unlocks the largest expansion and returns {row,col};
+     returns {-1,-1} if no mine remains. */
+    int[] applyHint();
+
+    /** Current number of flagged squares (for the Mines-Left HUD). */
+    int  getNumFlags();
 }
 

@@ -254,4 +254,28 @@ public class ViewGUI implements ControllerToViewGUI{
             System.exit(NULL_EXIT_CODE);
         return myController.getExtraLivesLeft();
     }
+
+    public void hint() {
+        int[] rc = myController.applyHint();        // real state mutation
+        if (rc[0] == -1) {
+            createPopUp("No hint available – all mines flagged!", 300, 150, false);
+            return;
+        }
+        gameframe.showHint(rc[0], rc[1]);         // paint yellow F
+        gameframe.updateMinesLeft(
+                myController.getNumMines() - myController.getNumFlags());
+
+        if (myController.playerWon()) endGame(true);   // trigger normal win flow
+    }
+
+    private void endGame(boolean won) {
+        if (gameframe == null) return;
+        long roundTime = gameframe.stopTimer();
+        endframe = new ViewEndFrame(this, won,
+                roundTime,
+                myController.getBestTime(),
+                myController.getTotalGamesPlayed(),
+                myController.getTotalGamesWon());
+        gameframe.dispose();
+    }
 }

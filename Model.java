@@ -373,7 +373,7 @@ public class Model implements ControllerToModel{
         if(flaggedTiles==null)
             System.exit(NULL_EXIT_CODE);
         flaggedTiles[row][col] = flagged;
-        debugPrintState("tileFlagged @ (" + row + "," + col + ")");
+//        debugPrintState("tileFlagged @ (" + row + "," + col + ")");
     }
 
     public ArrayList<String> getDifficulties()
@@ -455,7 +455,7 @@ public class Model implements ControllerToModel{
             }
 
         }
-        debugPrintState("tilePressed @ (" + row + "," + col + ")");
+//        debugPrintState("tilePressed @ (" + row + "," + col + ")");
         return exposedTiles;
     }
 
@@ -584,9 +584,64 @@ public class Model implements ControllerToModel{
         return true;
     }
 
-    // ────────────────────────────────────────────────────────────────────────────
-// DEBUG HELPERS
-// ────────────────────────────────────────────────────────────────────────────
+    private int[] findBestMine() {
+        int bestRow = -1, bestCol = -1, bestGain = 0;
+
+        for (int m = 0; m < numberMines; m++) {
+            int r = mineLocations[0][m], c = mineLocations[1][m];
+            if (exposedTiles[r][c] || flaggedTiles[r][c]) continue;
+
+             /* ── the mine is a valid hint only if at least
+       three surrounding NON-mine squares are already revealed. ── */
+            int exposedNbrs = 0;
+            for (int dr = -1; dr <= 1; dr++) {
+                for (int dc = -1; dc <= 1; dc++) {
+                    if (dr == 0 && dc == 0) continue;                // skip self
+                    int nr = r + dr, nc = c + dc;
+                    if (nr < 0 || nr >= numberRows ||
+                            nc < 0 || nc >= numberCols) continue;        // off board
+                    if (isMine(nr, nc) == 0 && exposedTiles[nr][nc]) // non-mine & shown
+                        exposedNbrs++;
+                }
+            }
+            if (exposedNbrs < 3) continue;          //  ←  **skip this mine**
+
+            // work on copies
+            boolean[][] ex   = deepCopy(exposedTiles);
+            boolean[][] flg  = deepCopy(flaggedTiles);
+            int[][]     prs  = deepCopy(timesNumberPressed);
+            flg[r][c] = true;                                // pretend to flag
+
+            int delta;
+            do {
+                int before = countTrue(ex);
+                expandOnce(actualGrid, ex, flg, prs);
+                delta = countTrue(ex) - before;
+            } while (delta > 0);
+
+            int gain = countTrue(ex) - countTrue(exposedTiles);
+            if (gain > bestGain) { bestGain = gain; bestRow = r; bestCol = c; }
+        }
+        return new int[]{bestRow, bestCol};
+    }
+
+    /**
+     * Flags the mine that would unlock the largest expansion wave and
+     * returns its coordinate {row,col}.  {-1,-1} if nothing left.
+     */
+    public int[] applyHint() {
+        int[] p = findBestMine();
+        if (p[0] == -1) return p;             // no mine found
+
+        tileFlagged(true, p[0], p[1]);              // updates flaggedTiles & HUD data
+
+        // if every mine is now flagged, declare victory
+        if (countFlags() == numberMines) won = true;
+
+        return p;
+    }
+
+// debug helper
     /**
      * Dumps the current contents of all per-cell arrays so that you can follow
      * how a single user action changed the model’s state.
@@ -611,4 +666,101 @@ public class Model implements ControllerToModel{
 //		System.out.println("won=" + won + ", lost=" + lost);
         System.out.println("========================================\n");
     }
+
+    // ── generic deep-copy helpers ────────────────────────────────────────────
+    /* ────────────────────────────────────────────────────────────── */
+    /*  Deep-copy a 2-D reference array without triggering            */
+    /*  ‘generic array creation’ compile errors.                      */
+    /*  Works for any T because each row is cloned individually.      */
+    /* ────────────────────────────────────────────────────────────── */
+    private static <T> T[][] deepCopy(T[][] src) {
+        if (src == null) return null;
+
+        @SuppressWarnings("unchecked")
+        T[][] dest = src.clone();          // shallow clone of outer array
+        for (int i = 0; i < src.length; i++)
+            dest[i] = src[i].clone();      // deep clone each row
+
+        return dest;
+    }
+
+    private static boolean[][] deepCopy(boolean[][] src) {
+        return java.util.Arrays.stream(src).map(boolean[]::clone).toArray(boolean[][]::new);
+    }
+    private static int[][] deepCopy(int[][] src) {
+        return java.util.Arrays.stream(src).map(int[]::clone).toArray(int[][]::new);
+    }
+    private static int countTrue(boolean[][] a) {
+        int n = 0; for (boolean[] r : a) for (boolean b : r) if (b) n++; return n;
+    }
+    private int countFlags() { return countTrue(flaggedTiles); }
+
+    /* ──────────────────────────────────────────────────────────────── */
+    /*  count how many adjacent squares are flagged        */
+    private int countAdjacentFlags(int row, int col, boolean[][] flg) {
+        int cnt = 0;
+        for (int dr = -1; dr <= 1; dr++) {
+            for (int dc = -1; dc <= 1; dc++) {
+                if (dr == 0 && dc == 0) continue;          // skip self
+                int nr = row + dr, nc = col + dc;
+                if (nr < 0 || nr >= numberRows ||
+                        nc < 0 || nc >= numberCols) continue;  // off board
+                if (flg[nr][nc]) cnt++;
+            }
+        }
+        return cnt;
+    }
+
+    /* ──────────────────────────────────────────────────────────────── */
+    /*  reveal the 8-neighbour “ring” around a number      */
+    private void revealRing(int row, int col,
+                            String[][] g,      // immutable truth grid
+                            boolean[][] ex,    // exposedTiles COPY
+                            boolean[][] flg,   // flaggedTiles COPY
+                            int[][] press) {   // timesNumberPressed COPY
+        for (int dr = -1; dr <= 1; dr++) {
+            for (int dc = -1; dc <= 1; dc++) {
+                if (dr == 0 && dc == 0) continue;
+                int nr = row + dr, nc = col + dc;
+                if (nr < 0 || nr >= numberRows ||
+                        nc < 0 || nc >= numberCols) continue;
+
+                if (ex[nr][nc] || flg[nr][nc]) continue;   // already open or flagged
+                ex[nr][nc] = true;                         // reveal neighbour
+                press[nr][nc] = 1;                         // mark one click
+
+                // flood-fill further if it was a blank square
+                if (g[nr][nc].equals(EMPTY))
+                    revealRing(nr, nc, g, ex, flg, press);
+            }
+        }
+    }
+
+
+    /* ──────────────────────────────────────────────────────────────── */
+    /*  – one global sweep looking for auto-open candidates  */
+    private void expandOnce(String[][] g, boolean[][] ex,
+                            boolean[][] flg, int[][] press) {
+
+        for (int r = 0; r < numberRows; r++) {
+            for (int c = 0; c < numberCols; c++) {
+                if (!ex[r][c]) continue;                    // number must be visible
+                char ch = g[r][c].charAt(0);
+                if (ch < '1' || ch > '8') continue;         // not a number tile
+
+                int need = ch - '0';
+                int have = countAdjacentFlags(r, c, flg);
+                if (have >= need) {
+                    // mimic the user’s second click on that number
+                    revealRing(r, c, g, ex, flg, press);
+                }
+            }
+        }
+    }
+
+    @Override
+    public int getNumFlags() {
+        return countFlags();          // countFlags() helper already exists
+    }
+
 }

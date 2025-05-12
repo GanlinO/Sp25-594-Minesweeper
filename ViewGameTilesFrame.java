@@ -24,6 +24,8 @@ public class ViewGameTilesFrame extends JFrame{
     private final int topHeight = 100; //height for the top of the game
     //where extralives, time passed, mines left are put
 
+    private JButton hintBtn;
+    private JPanel hudPanel;
     private ViewGUI view;
     private JButton[][] buttons; //buttons for the tile grid
     private int numrows; //number of rows in the grid
@@ -65,7 +67,9 @@ public class ViewGameTilesFrame extends JFrame{
         setJMenuBar(createMenu(menubar));
 
         //holds the extra lives (if applicable), mines left, time passed
-        add(topPanel(mines),BorderLayout.PAGE_START);
+        hudPanel = topPanel(mines);                 // keep a reference
+        add(hudPanel, BorderLayout.PAGE_START);
+
         if(grid!=null)
             add(centerPanel(grid),BorderLayout.CENTER);
 
@@ -76,7 +80,20 @@ public class ViewGameTilesFrame extends JFrame{
         });
 
         setVisible(true);
+
+        hintBtn = new JButton("Hint");
+        hintBtn.setForeground(Color.BLUE);
+        hintBtn.addActionListener(new ViewHintListener(view));   // use the existing ‘view’
+        hudPanel.add(hintBtn);                                   // add to the HUD strip
+
+
         timer.start();
+    }
+
+    public void showHint(int row, int col) {
+        JButton b = buttons[row][col];
+        b.setText("F");
+        b.setForeground(Color.BLUE);
     }
 
     //create and return the menu bar for the game
@@ -130,6 +147,12 @@ public class ViewGameTilesFrame extends JFrame{
             String text = extralives.getText();
             extralives.setText(text.substring(0, text.length()-1)+lives);
         }
+    }
+
+    /** Refresh the “Mines Left” label after a hint or flag change. */
+    public void updateMinesLeft(int remaining) {
+        if (minesLeft != null)
+            minesLeft.setText("Mines Left: " + remaining);
     }
 
     //make sure all tiles shown to user (true in exposed[][]) are displayed

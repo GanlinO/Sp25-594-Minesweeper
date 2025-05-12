@@ -54,6 +54,7 @@ public interface ControllerToModel {
     public long getTotalGamesWon();
     public long getTotalGamesPlayed();
     public String getBestTimes();
-
+    public int[] applyHint();
+    public int getNumFlags();
 }
 
