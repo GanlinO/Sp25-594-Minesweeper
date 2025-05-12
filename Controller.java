@@ -125,6 +125,55 @@ public class Controller implements ViewGUIToController {
 			System.exit(NULL_EXIT_CODE);
 		return myModel.EMPTY;
 	}
+	// Sets the number of rows for a custom game board configuration via the model.
+	public void setCustomRows(int rows) {
+		if(myModel == null)
+			System.exit(NULL_EXIT_CODE);
+		myModel.setCustomRows(rows);
+	}
+	
+	// Sets the number of columns for a custom game board configuration via the model.
+	public void setCustomColumns(int cols) {
+		if(myModel == null)
+			System.exit(NULL_EXIT_CODE);
+		myModel.setCustomColumns(cols);
+	}
+	
+	// Sets the number of mines for a custom game board configuration via the model.
+	public void setCustomMines(int mines) {
+		if(myModel == null)
+			System.exit(NULL_EXIT_CODE);
+		myModel.setCustomMines(mines);
+	}
+	
+	// Retrieves the total number of games won, as stored by the model.
+	public long getTotalGamesWon() {
+		if(myModel == null)
+			System.exit(NULL_EXIT_CODE);
+		return myModel.getTotalGamesWon();
+	}
+	
+	// Retrieves the total number of games played, as stored by the model.
+	public long getTotalGamesPlayed() {
+		if(myModel == null)
+			System.exit(NULL_EXIT_CODE);
+		return myModel.getTotalGamesPlayed();
+	}
+	
+	// Returns a string summary of the best recorded game times, as stored by the model.
+	public String getBestTime() {
+		if(myModel == null)
+			System.exit(NULL_EXIT_CODE);
+		return myModel.getBestTimes();
+	}
+	
+	// Returns the game rules as a formatted string from the model.
+	public String getRules() {
+		if(myModel == null)
+			System.exit(NULL_EXIT_CODE);
+		return myModel.RULES;
+	}
+}
 
 	
 	
