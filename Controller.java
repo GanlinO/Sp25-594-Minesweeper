@@ -15,3 +15,9 @@ public class Controller implements ViewGUIToController {
 		if(myModel == null || myView == null)
 			System.exit(NULL_EXIT_CODE);
 	}
+	// Starts the game by initializing the GUI with the list of available difficulties from the model.
+	public void go() {
+		if(myModel == null || myView == null)
+			System.exit(NULL_EXIT_CODE);
+		myView.go(myModel.getDifficulties());
+	}
