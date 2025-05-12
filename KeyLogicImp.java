@@ -1,27 +1,161 @@
+import java.util.ArrayList;
+import java.util.PriorityQueue;
+import java.util.Comparator;
+
+/**
+ * The KeyLogicImp class implements logical analysis for Minesweeper game.
+ * It provides methods for suggesting moves to the player, both for safety
+ * and strategic advantage.
+ */
 public class KeyLogicImp {
+
+    // Constants
+    private static final String MINE = "M";
+    private static final String EMPTY = " ";
+
+    /**
+     * Suggests a cell that can be logically inferred to contain a mine.
+     * Uses only the information currently visible to the player.
+     *
+     * @param actualGrid The complete game grid with all cell values
+     * @param exposedTiles Boolean matrix indicating which tiles are exposed
+     * @param flaggedTiles Boolean matrix indicating which tiles are flagged
+     * @return Coordinates [row, col] of a cell that must be a mine, or null if none found
+     */
     public static int[] suggestCellToRevealAsMine(String[][] actualGrid, boolean[][] exposedTiles, boolean[][] flaggedTiles) {
-        // Caution: you can only use the revealed parts of actualGrid for logic inference
+        // Only use information that is visible to the player (exposed tiles)
+        int rows = actualGrid.length;
+        int cols = actualGrid[0].length;
 
-        // Return the coordinates of any cell that is logically inferred to be a mine
-        // in the format of int[2], e.g. [1, 2] if the coordinates are (1, 2)
+        // Check each exposed numbered cell
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                if (exposedTiles[row][col] && isNumeric(actualGrid[row][col])) {
+                    int number = Integer.parseInt(actualGrid[row][col]);
 
-        // However, if all mines have already been revealed, or no remaining cell can be logically inferred
-        // to be a mine, i.e. the next click has to be a random guessing, return null
+                    // Get all hidden neighbors and flagged neighbors
+                    ArrayList<int[]> hiddenNeighbors = getHiddenNeighbors(row, col, rows, cols, exposedTiles);
+                    int flaggedCount = countFlaggedNeighbors(row, col, rows, cols, flaggedTiles);
 
+                    // If (number - flaggedCount) equals remaining hidden cells,
+                    // then all hidden cells must be mines
+                    if (number - flaggedCount == hiddenNeighbors.size() && hiddenNeighbors.size() > 0) {
+                        for (int[] neighbor : hiddenNeighbors) {
+                            if (!flaggedTiles[neighbor[0]][neighbor[1]]) {
+                                return neighbor; // Return the first unflagged mine
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-        return null;
+        // More complex inference logic for overlapping constraints
+        return findMineByConstraintOverlap(actualGrid, exposedTiles, flaggedTiles);
     }
 
-    public static int[] suggestNextMineToReveal(String[][] actualGrid, boolean[][] exposedTiles, boolean[][] flaggedTiles) {
-        // In this case, you can use all information in actualGrid
+    /**
+     * Uses constraint overlap to find mines when simple methods fail.
+     * This method handles more complex logical inferences.
+     */
+    private static int[] findMineByConstraintOverlap(String[][] actualGrid, boolean[][] exposedTiles, boolean[][] flaggedTiles) {
+        int rows = actualGrid.length;
+        int cols = actualGrid[0].length;
 
-        // Return the coordinates of a mine that left-click its neighboring revealed numbers will
-        // lead to the largest number of cell expansions
+        // For each pair of adjacent numbered cells, check for constraint overlap
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                if (exposedTiles[row][col] && isNumeric(actualGrid[row][col])) {
+                    int number1 = Integer.parseInt(actualGrid[row][col]);
+                    ArrayList<int[]> hiddenNeighbors1 = getHiddenNeighbors(row, col, rows, cols, exposedTiles);
+                    int flaggedCount1 = countFlaggedNeighbors(row, col, rows, cols, flaggedTiles);
+                    int remainingMines1 = number1 - flaggedCount1;
 
-        // The existing expansion logic in Model.java, i.e. fillOutTiles()
-        // is not completely correct. Feel free to draw some inspiration, but you may have to make
-        // some corrections
-        return null;
+                    // Check all neighbors that are also numbered cells
+                    for (int[] offset : getNeighborOffsets()) {
+                        int r2 = row + offset[0];
+                        int c2 = col + offset[1];
+
+                        // Check if the neighbor is valid and is an exposed number
+                        if (isValidCell(r2, c2, rows, cols) &&
+                                exposedTiles[r2][c2] &&
+                                isNumeric(actualGrid[r2][c2])) {
+
+                            int number2 = Integer.parseInt(actualGrid[r2][c2]);
+                            ArrayList<int[]> hiddenNeighbors2 = getHiddenNeighbors(r2, c2, rows, cols, exposedTiles);
+                            int flaggedCount2 = countFlaggedNeighbors(r2, c2, rows, cols, flaggedTiles);
+                            int remainingMines2 = number2 - flaggedCount2;
+
+                            // Find cells that are neighbors of cell1 but not of cell2
+                            ArrayList<int[]> uniqueToCell1 = new ArrayList<>();
+                            for (int[] neighbor : hiddenNeighbors1) {
+                                boolean found = false;
+                                for (int[] neighbor2 : hiddenNeighbors2) {
+                                    if (neighbor[0] == neighbor2[0] && neighbor[1] == neighbor2[1]) {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (!found) {
+                                    uniqueToCell1.add(neighbor);
+                                }
+                            }
+
+                            // Find common hidden neighbors
+                            ArrayList<int[]> commonHidden = new ArrayList<>();
+                            for (int[] neighbor : hiddenNeighbors1) {
+                                for (int[] neighbor2 : hiddenNeighbors2) {
+                                    if (neighbor[0] == neighbor2[0] && neighbor[1] == neighbor2[1]) {
+                                        commonHidden.add(neighbor);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            // If cell1 has remainingMines1 exactly equal to its unique cells,
+                            // then all common cells must not be mines
+                            if (uniqueToCell1.size() == remainingMines1 && uniqueToCell1.size() > 0 && !uniqueToCell1.isEmpty()) {
+                                // All unique cells must be mines
+                                for (int[] mine : uniqueToCell1) {
+                                    if (!flaggedTiles[mine[0]][mine[1]]) {
+                                        return mine;
+                                    }
+                                }
+                            }
+
+                            // If cell2 requires more mines than are available in its non-common cells,
+                            // then some common cells must be mines
+                            ArrayList<int[]> uniqueToCell2 = new ArrayList<>();
+                            for (int[] neighbor : hiddenNeighbors2) {
+                                boolean found = false;
+                                for (int[] neighbor1 : hiddenNeighbors1) {
+                                    if (neighbor[0] == neighbor1[0] && neighbor[1] == neighbor1[1]) {
+                                        found = true;
+                                        break;
+                                    }
+                                }
+                                if (!found) {
+                                    uniqueToCell2.add(neighbor);
+                                }
+                            }
+
+                            // If cell2's remaining mines minus its unique cells is greater than zero,
+                            // and that equals the number of common cells, all common cells must be mines
+                            if (remainingMines2 > uniqueToCell2.size() &&
+                                    (remainingMines2 - uniqueToCell2.size() == commonHidden.size()) &&
+                                    !commonHidden.isEmpty()) {
+                                // All common cells must be mines
+                                for (int[] mine : commonHidden) {
+                                    if (!flaggedTiles[mine[0]][mine[1]]) {
+                                        return mine;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return null; // No definite mine found through constraint overlap
     }
-
-}
