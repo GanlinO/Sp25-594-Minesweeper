@@ -54,5 +54,12 @@ public class Controller implements ViewGUIToController {
 		return myModel.getNumMines();
 	}
 
+		// Retrieves the current state of the game grid from the model as a 2D array of strings.
+	public String[][] getGrid() {
+		if(myModel == null)
+			System.exit(NULL_EXIT_CODE);
+		return myModel.getGrid();
+	}
+
 	
 	
