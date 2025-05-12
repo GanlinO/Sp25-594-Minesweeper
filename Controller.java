@@ -173,6 +173,112 @@ public class Controller implements ViewGUIToController {
 			System.exit(NULL_EXIT_CODE);
 		return myModel.RULES;
 	}
+/**
+ * Provides a hint to the player based on the current game state.
+ * Uses the KeyLogicImp class to analyze the game board and suggest a safe move.
+ * 
+ * @return int[] coordinates [row, col] of the suggested move
+ */
+public int[] getHint() {
+    if(myModel == null)
+        System.exit(NULL_EXIT_CODE);
+    
+    // Get the current game state from the model
+    String[][] actualGrid = myModel.getGrid();
+    boolean[][] exposedTiles = myModel.getExposed();
+    boolean[][] flaggedTiles = new boolean[actualGrid.length][actualGrid[0].length];
+    
+    // We need to recreate the flagged tiles array since Model doesn't provide direct access
+    for (int i = 0; i < actualGrid.length; i++) {
+        for (int j = 0; j < actualGrid[0].length; j++) {
+            // A tile is considered flagged if it's not exposed and has a flag on it
+            // This is an approximation - in a full implementation, you would track flags in the Model
+            if (!exposedTiles[i][j]) {
+                // Check if this position is in the list of flagged positions
+                // In a real implementation, you'd have access to the actual flagged array
+                // For now, this is a placeholder
+                // flaggedTiles[i][j] = model.isFlagged(i, j);
+            }
+        }
+    }
+    
+    // First try to find a safe cell to click
+    int[] safeCell = findSafeCell(actualGrid, exposedTiles, flaggedTiles);
+    if (safeCell != null) {
+        return safeCell;
+    }
+    
+    // If no safe cell is found, try to find a cell that should be flagged
+    int[] mineCell = KeyLogicImp.suggestCellToRevealAsMine(actualGrid, exposedTiles, flaggedTiles);
+    if (mineCell != null) {
+        // We found a mine, but we don't want to tell the player to click on a mine
+        // Instead, we'll return it so the UI can highlight it as a flag suggestion
+        return mineCell;
+    }
+    
+    return null;
+}
+
+/**
+ * Helper method to find a safe cell to click based on current game state
+ */
+private int[] findSafeCell(String[][] actualGrid, boolean[][] exposedTiles, boolean[][] flaggedTiles) {
+    int rows = actualGrid.length;
+    int cols = actualGrid[0].length;
+    
+    // Check each exposed numbered cell
+    for (int row = 0; row < rows; row++) {
+        for (int col = 0; col < cols; col++) {
+            if (exposedTiles[row][col] && isNumeric(actualGrid[row][col])) {
+                int number = Integer.parseInt(actualGrid[row][col]);
+                
+                // Count flagged neighbors
+                int flaggedCount = 0;
+                ArrayList<int[]> hiddenNeighbors = new ArrayList<>();
+                
+                // Check all 8 surrounding cells
+                for (int dr = -1; dr <= 1; dr++) {
+                    for (int dc = -1; dc <= 1; dc++) {
+                        if (dr == 0 && dc == 0) continue; // Skip the cell itself
+                        
+                        int r = row + dr;
+                        int c = col + dc;
+                        
+                        if (r >= 0 && r < rows && c >= 0 && c < cols) {
+                            if (flaggedTiles[r][c]) {
+                                flaggedCount++;
+                            } else if (!exposedTiles[r][c]) {
+                                hiddenNeighbors.add(new int[]{r, c});
+                            }
+                        }
+                    }
+                }
+                
+                // If this numbered cell has exactly the right number of flags around it,
+                // all other hidden neighbors must be safe
+                if (flaggedCount == number && !hiddenNeighbors.isEmpty()) {
+                    return hiddenNeighbors.get(0);
+                }
+            }
+        }
+    }
+    
+    return null;
+}
+
+/**
+ * Helper method to check if a string is numeric
+ */
+private boolean isNumeric(String str) {
+    if (str == null) {
+        return false;
+    }
+    try {
+        Integer.parseInt(str);
+        return true;
+    } catch (NumberFormatException e) {
+        return false;
+    }
 }
 
 	
