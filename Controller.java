@@ -33,3 +33,12 @@ public class Controller implements ViewGUIToController {
 			System.exit(NULL_EXIT_CODE);
 		return myModel.getDifficulties();
 	}
+
+	// Returns the string used to represent a mine tile from the model.
+	public String getMineString() {
+		if(myModel == null)
+			System.exit(NULL_EXIT_CODE);
+		return myModel.MINE;
+	}
+
+	
