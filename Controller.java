@@ -1,9 +1,17 @@
 import java.util.ArrayList;
-//manages communication between the view and the model components
-//(not REALLY needed, but could be helpful)
-public class Controller implements ViewGUIToController{
+
+// The Controller class manages communication between the view (GUI) and the model components.
+// It follows the MVC (Model-View-Controller) architecture to handle user inputs and updates.
+public class Controller implements ViewGUIToController {
 	
 	private ControllerToViewGUI myView;
 	private ControllerToModel myModel;
 	
-	public Controller()
+// Constructor initializes the model and view components.
+	// If either component fails to initialize, the program exits with an error.
+	public Controller() {
+		myModel = new Model();
+		myView = new ViewGUI(this);
+		if(myModel == null || myView == null)
+			System.exit(NULL_EXIT_CODE);
+	}
