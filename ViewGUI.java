@@ -273,4 +273,3 @@ public class ViewGUI implements ControllerToViewGUI{
         }
     }
 }
-}
