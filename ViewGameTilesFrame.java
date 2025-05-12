@@ -35,6 +35,7 @@ public class ViewGameTilesFrame extends JFrame{
     private Timer timer; //has action listener to increment time every second
     //can be stopped and started through this class
     private JLabel extralives; //number of extra lives user has left
+    private JButton hintButton; // Button to request a hint
 
     //given the view, actual grid of tile strings, number of mines in the grid
     public ViewGameTilesFrame(ViewGUI myView,String [][] grid, int mines)
@@ -156,6 +157,27 @@ public class ViewGameTilesFrame extends JFrame{
         repaint();
     }
 
+        // Highlight a cell recommended as a hint
+    public void highlightHintCell(int row, int col, boolean isMine) {
+        if (buttons != null && row >= 0 && col >= 0 && row < numrows && col < numcols) {
+            // Use a distinctive color for the hint
+            Color hintColor = isMine ? new Color(255, 200, 200) : new Color(200, 255, 200);
+            buttons[row][col].setBackground(hintColor);
+
+            // After 2 seconds, remove the highlight if the tile hasn't been clicked
+            new Timer(2000, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (!buttons[row][col].getText().equals(buttons[row][col].getActionCommand().split(",")[2])) {
+                        buttons[row][col].setBackground(null);
+                    }
+                    ((Timer)e.getSource()).stop();
+                }
+            }).start();
+        }
+    }
+
+
     //create and return the top panel with the number of mines left,
     //time passed, lives left (if applicable)
     private JPanel topPanel(int mines)
@@ -183,6 +205,20 @@ public class ViewGameTilesFrame extends JFrame{
         time.setFont(new Font("Arial",Font.BOLD,fontSize));
         timer = new Timer(1000, new ViewTimerActionListener(this));
         top.add(time);
+
+        // Add hint button
+        hintButton = new JButton("Hint");
+        hintButton.setFont(new Font("Arial", Font.BOLD, fontSize));
+        hintButton.setActionCommand("Hint");
+        if (view != null) {
+    h        intButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            view.requestHint();
+        }
+    });
+}
+top.add(hintButton);
 
         return top;
     }
