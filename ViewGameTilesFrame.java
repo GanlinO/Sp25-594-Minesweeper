@@ -211,7 +211,7 @@ public class ViewGameTilesFrame extends JFrame{
         hintButton.setFont(new Font("Arial", Font.BOLD, fontSize));
         hintButton.setActionCommand("Hint");
         if (view != null) {
-    h        intButton.addActionListener(new ActionListener() {
+        hintButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             view.requestHint();
