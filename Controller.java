@@ -40,5 +40,10 @@ public class Controller implements ViewGUIToController {
 			System.exit(NULL_EXIT_CODE);
 		return myModel.MINE;
 	}
-
+	// Signals the model that the game is starting and returns true if the game starts successfully.
+	public boolean startGame() {
+		if(myModel == null)
+			System.exit(NULL_EXIT_CODE);
+		return myModel.startGame();
+	}
 	
