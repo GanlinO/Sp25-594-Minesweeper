@@ -46,4 +46,13 @@ public class Controller implements ViewGUIToController {
 			System.exit(NULL_EXIT_CODE);
 		return myModel.startGame();
 	}
+
+		// Returns the number of mines placed on the board, as determined by the model.
+	public int getNumMines() {
+		if(myModel == null)
+			System.exit(NULL_EXIT_CODE);
+		return myModel.getNumMines();
+	}
+
+	
 	
