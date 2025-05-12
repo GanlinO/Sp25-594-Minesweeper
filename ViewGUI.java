@@ -254,8 +254,6 @@ public class ViewGUI implements ControllerToViewGUI{
             System.exit(NULL_EXIT_CODE);
         return myController.getExtraLivesLeft();
     }
-}
-
     /**
      * Called when the user requests a hint
      * Gets hint from the controller and displays it in the game frame
@@ -274,4 +272,5 @@ public class ViewGUI implements ControllerToViewGUI{
             createPopUp("No logical hint available. Try using some strategy!", 400, 150, true);
         }
     }
+}
 }
