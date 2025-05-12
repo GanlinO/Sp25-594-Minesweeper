@@ -27,3 +27,9 @@ public class Controller implements ViewGUIToController {
 			System.exit(NULL_EXIT_CODE);
 		myModel.setDifficulty(difficulty);
 	}
+		// Retrieves the list of preset difficulty levels from the model.
+	public ArrayList<String> getDifficulties() {
+		if(myModel == null)
+			System.exit(NULL_EXIT_CODE);
+		return myModel.getDifficulties();
+	}
