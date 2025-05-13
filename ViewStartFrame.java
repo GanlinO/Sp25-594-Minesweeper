@@ -17,8 +17,12 @@ import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
-//main frame to start up the minesweeper game
-//user selects different settings before the actual game
+
+/**
+ * Initial frame displayed when starting the game.
+ * Allows the player to select difficulty level, customize game settings,
+ * and toggle options like extra lives and logical mode.
+ */
 public class ViewStartFrame extends JFrame{
 
     private final int fontSize = 18;
@@ -47,6 +51,12 @@ public class ViewStartFrame extends JFrame{
     private JRadioButton two; //2 extra lives
     private JRadioButton three; //3 extra lives
 
+    /**
+     * Creates a new start frame with the specified difficulty options.
+     *
+     * @param view Reference to the main view
+     * @param difficulties List of available difficulty options
+     */
     public ViewStartFrame(ViewGUI view, ArrayList<String> difficulties)
     {
         super("Welcome to Minesweeper!");
@@ -57,9 +67,9 @@ public class ViewStartFrame extends JFrame{
         setLayout(new GridLayout(4,1));
         setLocationRelativeTo(null);
 
-        addDifficulties(difficulties); //different difficulties user can select from
-        addCheckBoxes(); //additional options (extra lives) for user to select
-        addPlayExitButtons(); //buttons user can press
+        addDifficulties(difficulties); // Different difficulties user can select from
+        addCheckBoxes(); // Additional options (logical mode, extra lives) for user to select
+        addPlayExitButtons(); // Buttons user can press
 
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent windowEvent){
@@ -70,40 +80,50 @@ public class ViewStartFrame extends JFrame{
         setVisible(true);
     }
 
-    //create the different difficulties and add to the frame
-    //beginner selected at start
-    private void addDifficulties(ArrayList<String> difficulties)
-    {
+    /**
+     * Creates and adds difficulty radio buttons to the frame.
+     *
+     * @param difficulties List of available difficulty options
+     */
+    private void addDifficulties(ArrayList<String> difficulties) {
         ButtonGroup bgroup = new ButtonGroup();
 
-        JRadioButton beginner = createRadioButton(beginnerDifficulty, difficulties.get(0),true,KeyEvent.VK_B,true);
+        // Beginner difficulty (default)
+        JRadioButton beginner = createRadioButton(beginnerDifficulty, difficulties.get(0), true, KeyEvent.VK_B, true);
         bgroup.add(beginner);
 
-        JRadioButton intermed = createRadioButton(interDifficulty, difficulties.get(1),true,KeyEvent.VK_I,false);
+        // Intermediate difficulty
+        JRadioButton intermed = createRadioButton(interDifficulty, difficulties.get(1), true, KeyEvent.VK_I, false);
         bgroup.add(intermed);
 
-        JRadioButton expert = createRadioButton(expertDifficulty,difficulties.get(2),true,KeyEvent.VK_E,false);
+        // Expert difficulty
+        JRadioButton expert = createRadioButton(expertDifficulty, difficulties.get(2), true, KeyEvent.VK_E, false);
         bgroup.add(expert);
 
-        JRadioButton custom = createRadioButton(customDifficulty,difficulties.get(3), true,KeyEvent.VK_C,false);
+        // Custom difficulty
+        JRadioButton custom = createRadioButton(customDifficulty, difficulties.get(3), true, KeyEvent.VK_C, false);
         bgroup.add(custom);
-        //add custom's row,col,mine entries as spinners
+
+        // Custom difficulty spinners
         JPanel spinners = createSpinners();
 
+        // Add all radio buttons to a panel
         JPanel radiopanel = new JPanel();
-        radiopanel.setLayout(new BoxLayout(radiopanel,BoxLayout.Y_AXIS));
+        radiopanel.setLayout(new BoxLayout(radiopanel, BoxLayout.Y_AXIS));
         radiopanel.add(beginner);
         radiopanel.add(intermed);
         radiopanel.add(expert);
         radiopanel.add(custom);
 
-        add(radiopanel); //add to this jframe (start frame)
+        add(radiopanel); // Add to this JFrame (start frame)
         add(spinners);
-
     }
 
-    //create the different spinners for custom difficulty
-    //row, column, mine spinners (disabled until custom selected)
+    /**
+     * Creates spinners for the custom difficulty option.
+     *
+     * @return Panel containing row, column, and mine count spinners
+     */
     private JPanel createSpinners()
     {
         rowspinner = new JSpinner(rowmodel);
@@ -121,6 +141,7 @@ public class ViewStartFrame extends JFrame{
             minespinner.addChangeListener(new ViewSpinnerListener(myView));
         }
 
+        // Disabled until custom difficulty is selected
         rowspinner.setEnabled(false);
         colspinner.setEnabled(false);
         minespinner.setEnabled(false);
@@ -146,7 +167,16 @@ public class ViewStartFrame extends JFrame{
         return panel;
     }
 
-    //create a single radio button with the given information
+    /**
+     * Creates a radio button with the specified parameters.
+     *
+     * @param rbtext Button text
+     * @param actioncommand Command to execute when button is clicked
+     * @param useMnemonic Whether to use keyboard shortcut
+     * @param mnemonic Keyboard shortcut key code
+     * @param selected Whether button should be initially selected
+     * @return Configured JRadioButton
+     */
     private JRadioButton createRadioButton(String rbtext, String actioncommand,boolean useMnemonic, int mnemonic,boolean selected)
     {
         JRadioButton rbutton;
@@ -166,9 +196,11 @@ public class ViewStartFrame extends JFrame{
         return rbutton;
     }
 
-    //assumes custom difficulty was selected
-    //if enable is not the same state as the spinners,
-    //enable the custom spinner to be changed by the user
+    /**
+     * Enables or disables the custom spinner controls.
+     *
+     * @param enable True to enable spinners, false to disable
+     */
     public void enableCustomSpinners(boolean enable)
     {
         if(rowspinner!=null&&colspinner!=null&&minespinner!=null &&
@@ -186,8 +218,12 @@ public class ViewStartFrame extends JFrame{
         }
     }
 
-    //return the value for this spinner with an identifier
-    //based on which model the spinner follows
+    /**
+     * Gets the value from a spinner with an identifier based on which model it uses.
+     *
+     * @param spinner The spinner to get value from
+     * @return String containing the spinner type and value
+     */
     public String getCustomInfo(JSpinner spinner)
     {
         if(spinner!=null)
@@ -230,25 +266,28 @@ public class ViewStartFrame extends JFrame{
         return "ERROR!";
     }
 
-    //add check box(es) and accompanying buttons ("Extra Lives") to this frame
-    private void addCheckBoxes()
-    {
+    /**
+     * Adds checkboxes and accompanying radio buttons to the frame.
+     * Includes logical mode and extra lives options.
+     */
+    private void addCheckBoxes() {
+        // Logical mode checkbox
         logicalMode = createCheckBox("Logical Mode (no random guessing)",
                 KeyEvent.VK_M,   // mnemonic: Alt+M
                 false);          // not selected by default
-        if (myView != null)
+        if(myView != null)
             logicalMode.addItemListener(new ViewCheckBoxListener(myView));
 
-        JCheckBox extralives = createCheckBox("Extra Lives",KeyEvent.VK_L,false);
-        if(myView!=null)
+        // Extra lives checkbox
+        JCheckBox extralives = createCheckBox("Extra Lives", KeyEvent.VK_L, false);
+        if(myView != null)
             extralives.addItemListener(new ViewCheckBoxListener(myView));
 
-        //no extra lives by default
-        //add radio buttons to enable when extralives is enabled
+        // Extra lives radio buttons (disabled by default)
         ButtonGroup bgroup = new ButtonGroup();
-        one = createRadioButton("1","1extra",false,0,false);
-        two = createRadioButton("2","2extra",false,0,false);
-        three = createRadioButton("3","3extra",false,0,false);
+        one = createRadioButton("1", "1extra", false, 0, false);
+        two = createRadioButton("2", "2extra", false, 0, false);
+        three = createRadioButton("3", "3extra", false, 0, false);
         one.setEnabled(false);
         two.setEnabled(false);
         three.setEnabled(false);
@@ -257,18 +296,24 @@ public class ViewStartFrame extends JFrame{
         bgroup.add(three);
 
         JPanel checkboxpanel = new JPanel();
-        checkboxpanel.setLayout(new BoxLayout(checkboxpanel,BoxLayout.Y_AXIS));
+        checkboxpanel.setLayout(new BoxLayout(checkboxpanel, BoxLayout.Y_AXIS));
         checkboxpanel.add(logicalMode);
         checkboxpanel.add(extralives);
         checkboxpanel.add(one);
         checkboxpanel.add(two);
         checkboxpanel.add(three);
 
-        add(checkboxpanel); //add to the start frame
-
+        add(checkboxpanel); // Add to the start frame
     }
 
-    //create a single check box with the given information
+    /**
+     * Creates a checkbox with the specified parameters.
+     *
+     * @param boxtext Checkbox text
+     * @param mnemonic Keyboard shortcut key code
+     * @param selected Whether checkbox should be initially selected
+     * @return Configured JCheckBox
+     */
     private JCheckBox createCheckBox(String boxtext, int mnemonic, boolean selected)
     {
         JCheckBox thisbox;
@@ -283,7 +328,9 @@ public class ViewStartFrame extends JFrame{
         return thisbox;
     }
 
-    //add play and exit buttons to the frame
+    /**
+     * Adds Play and Exit buttons to the frame.
+     */
     private void addPlayExitButtons()
     {
         JButton playbutton = createButton("Play");
@@ -298,7 +345,12 @@ public class ViewStartFrame extends JFrame{
 
     }
 
-    //create a single JButton with given information
+    /**
+     * Creates a button with the specified text.
+     *
+     * @param buttontext Button text
+     * @return Configured JButton
+     */
     private JButton createButton(String buttontext)
     {
         JButton thisbutton;
@@ -312,9 +364,11 @@ public class ViewStartFrame extends JFrame{
         return thisbutton;
     }
 
-    //change the state of the extra lives radio buttons
-    //if radio buttons are enabled, disable them
-    //if they are disabled, enable them
+    /**
+     * Toggles the extra lives radio buttons.
+     * If they are disabled, enables them and selects "1".
+     * If they are enabled, disables them.
+     */
     public void extraLives()
     {
         if(myView!=null)

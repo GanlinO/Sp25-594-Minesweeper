@@ -1,19 +1,32 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-//listener for the timer object in the game frame
-//should get event every second to increment the time
-public class ViewTimerActionListener implements ActionListener{
 
+/**
+ * ActionListener for the timer object in the game frame.
+ * Increments the game time every second.
+ */
+public class ViewTimerActionListener implements ActionListener {
+
+    /** Reference to the game frame */
     private ViewGameTilesFrame myView;
 
-    public ViewTimerActionListener(ViewGameTilesFrame view){
+    /**
+     * Creates a new ViewTimerActionListener with a reference to the game frame.
+     *
+     * @param view Reference to the game frame
+     */
+    public ViewTimerActionListener(ViewGameTilesFrame view) {
         myView = view;
     }
 
-    public void actionPerformed(ActionEvent e){
-        if(myView!=null)
+    /**
+     * Processes timer events.
+     * Increments the game time by one second.
+     *
+     * @param e ActionEvent containing information about the timer event
+     */
+    public void actionPerformed(ActionEvent e) {
+        if(myView != null)
             myView.incrementTime();
     }
-
 }
-
