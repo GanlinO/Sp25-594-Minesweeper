@@ -11,51 +11,65 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 
-//creates a popup jframe to display the given msg to help the user
-public class ViewPopupHelp extends JFrame{
+/**
+ * Creates popup windows to display help text or messages to the user.
+ * Used for showing game rules and error messages.
+ */
+public class ViewPopupHelp extends JFrame {
 
+    /** Font size for text in the popup */
     private final int fontSize = 18;
+
+    /** Reference to the main view */
     private ViewGUI myView;
 
-    public ViewPopupHelp(ViewGUI view, String msg, int frameWidth, int frameHeight, boolean timer)
-    {
+    /**
+     * Creates a new popup window with the specified message and dimensions.
+     *
+     * @param view Reference to the main view
+     * @param msg Message to display in the popup
+     * @param frameWidth Width of the popup window
+     * @param frameHeight Height of the popup window
+     * @param timer Whether to pause the game timer while showing this popup
+     */
+    public ViewPopupHelp(ViewGUI view, String msg, int frameWidth, int frameHeight, boolean timer) {
         super("Help Window");
         myView = view;
 
-        //display the message
+        // Create text area to display the message
         JTextArea help = new JTextArea(msg);
         help.setBackground(getBackground());
-        help.setFont(new Font("Arial",Font.BOLD,fontSize));
+        help.setFont(new Font("Arial", Font.BOLD, fontSize));
         help.setLineWrap(true);
-        help.setWrapStyleWord(true);//wrap at word, not chars
+        help.setWrapStyleWord(true); // Wrap at word, not characters
         help.setEditable(false);
 
-        //okay button for user to press
+        // Create OK button for user to close the popup
         JButton ok = new JButton("Okay");
-        if(view!=null)
-        {
+        if(view != null) {
             ok.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e){
+                public void actionPerformed(ActionEvent e) {
                     myView.endHelpPopup(timer);
                     dispose();
                 }
             });
         }
-        ok.setFont(new Font("Arial",Font.BOLD,fontSize));
+        ok.setFont(new Font("Arial", Font.BOLD, fontSize));
         ok.setMnemonic(KeyEvent.VK_ENTER);
         ok.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        setSize(frameWidth,frameHeight); //using given width and height
+        // Set up window properties
+        setSize(frameWidth, frameHeight);
         setLayout(new BorderLayout());
         setLocationRelativeTo(null);
 
-        add(help,BorderLayout.PAGE_START);
-        add(ok,BorderLayout.PAGE_END);
+        add(help, BorderLayout.PAGE_START);
+        add(ok, BorderLayout.PAGE_END);
 
-        if(myView!=null)
-        { //if user hits exit
+        // Handle window close event
+        if(myView != null) {
             addWindowListener(new WindowAdapter() {
-                public void windowClosing(WindowEvent windowEvent){
+                public void windowClosing(WindowEvent windowEvent) {
                     myView.endHelpPopup(timer);
                     dispose();
                 }
@@ -65,4 +79,3 @@ public class ViewPopupHelp extends JFrame{
         setVisible(true);
     }
 }
-
