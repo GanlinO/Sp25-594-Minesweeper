@@ -89,7 +89,6 @@ public class ViewGUI implements ControllerToViewGUI{
             myNum = Integer.parseInt(info.substring(3));
         }catch(NumberFormatException ex)
         {
-            System.out.println("Error!");
             myNum = 0;
         }
         if(info.startsWith("row"))
@@ -284,19 +283,10 @@ public class ViewGUI implements ControllerToViewGUI{
     }
 
     public void autoSolve() {
-        System.out.println("autoSolve() invoked – logicalMode = " + logicalMode);
         if (!logicalMode) return;                 // guard clause
 
         new Thread(() -> {                        // run off the EDT
             myController.propagateLogicalConsequences();     // first wave
-
-            System.out.printf(
-                    "[autoSolve] after first propagate   won=%s  lost=%s  flags=%d  exposed=%d%n",
-                    myController.playerWon(),
-                    myController.playerLost(),
-                    myController.getNumFlags(),
-                    myController.getExposed()==null ? -1
-                            : myController.getExposed().length);
 
             while (!myController.playerWon() && !myController.playerLost()) {
 

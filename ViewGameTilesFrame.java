@@ -92,7 +92,6 @@ public class ViewGameTilesFrame extends JFrame{
         aiBtn = new JButton("AI solver");
         aiBtn.setForeground(Color.GREEN);
         aiBtn.addActionListener(e -> {
-            System.out.println("[UI]  AI‑solver button pressed");   //  ← must print!
             view.autoSolve();                                       //  ← existing call
         });
 
@@ -333,7 +332,6 @@ public class ViewGameTilesFrame extends JFrame{
             long curtime = Long.parseLong(time.getText());
             if(++curtime <=0)
             {
-                System.out.println("You took way too long!");
                 view.exitGame();
             }
             else

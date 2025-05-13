@@ -313,22 +313,11 @@ public class Model implements ControllerToModel {
                             if (exposedTiles[mineLocations[0][m]][mineLocations[1][m]])
                                 mineRevealed = true;
 
-                        /* ---- DEBUG: result after flood ---- */
-                        System.out.printf(
-                                "[Logical-mode] board %3d block %3d size %2d  floodExposed=%3d  mineRevealed=%s%n",
-                                boardsTried, blockIdx, block.size(), countTrue(exposedTiles), mineRevealed);
-                        /* ----------------------------------- */
-
                         if (mineRevealed) continue;                   // next region
 
                         boolean[][] firstView = deepCopy(exposedTiles);   // save flood
 
                         boolean solved = logicalSolve();                  // deterministic step
-
-                        /* ---- DEBUG: solver outcome ---- */
-                        System.out.printf("                → solver=%s  flags=%2d  finalExposed=%3d%n",
-                                solved, countTrue(flaggedTiles), countTrue(exposedTiles));
-                        /* ------------------------------- */
 
                         if (solved) {
                             /* keep only the initial flood for the user */
@@ -340,10 +329,7 @@ public class Model implements ControllerToModel {
 
                             timesNumberPressed = new int[numberRows][numberCols];
 
-                            System.out.printf(
-                                    "✔ logical board chosen after %d layouts (block size %d)%n",
-                                    boardsTried, block.size());
-                            break outer;                                // done!
+                            break outer;
                         }
                     }
 
@@ -352,11 +338,6 @@ public class Model implements ControllerToModel {
                     populateGridNumbers();
                 }
 
-                /* --------- report if we never found a solvable board --------- */
-                if (!won) {
-                    System.out.println("✘  gave up making an AI-solvable start – showing empty grid");
-                    System.out.printf("   exposed=%d  flags=%d%n", countTrue(exposedTiles), countTrue(flaggedTiles));
-                }
             }
             /* ───────────────────────────────────────────────────────── */
 
@@ -827,8 +808,8 @@ public class Model implements ControllerToModel {
         System.out.println("timesNumberPressed:");
         for (int[] r : timesNumberPressed) System.out.println(java.util.Arrays.toString(r));
 
-//		System.out.println("extraLivesLeft = " + extraLivesLeft);
-//		System.out.println("won=" + won + ", lost=" + lost);
+		System.out.println("extraLivesLeft = " + extraLivesLeft);
+		System.out.println("won=" + won + ", lost=" + lost);
         System.out.println("========================================\n");
     }
 
@@ -996,14 +977,10 @@ public class Model implements ControllerToModel {
     /*  Called by ViewGUI.autoSolve() through the Controller:              */
     /*  return the next certain mine, or null if logic is stalled.         */
     public int[] nextLogicalMine() {
-
         int[] m = suggestCellToRevealAsMine();     // <-- already implemented
         if (m == null) {
-            System.out.println("[AI-solver] no logically certain mine found – stop");
             return null;
         }
-
-        System.out.printf("[AI-solver] next mine  ->  (%d,%d)%n", m[0], m[1]);
         return m;
     }
 
