@@ -1,9 +1,12 @@
 ```mermaid
 classDiagram
     %% ─────────── Interfaces ───────────
-    class ControllerToModel      <<interface>>
-    class ControllerToViewGUI    <<interface>>
-    class ViewGUIToController    <<interface>>
+    class ControllerToModel
+    class ControllerToViewGUI
+    class ViewGUIToController
+    <<interface>> ControllerToModel
+    <<interface>> ControllerToViewGUI
+    <<interface>> ViewGUIToController
 
     %% ─────────── Core classes ─────────
     class Controller {
@@ -14,8 +17,8 @@ classDiagram
         + placeFlag(flag:bool, r:int, c:int)
         + reset()
         + setDifficulty(level:String)
-        <<implements ViewGUIToController>>
     }
+    Controller --|> ViewGUIToController        %% realises interface
 
     class Model {
         + startGame() : boolean
@@ -24,8 +27,8 @@ classDiagram
         + playerLost() : boolean
         + playerWon()  : boolean
         + setDifficulty(level:String)
-        <<implements ControllerToModel>>
     }
+    Model --|> ControllerToModel
 
     class ViewGUI {
         - ViewStartFrame      startframe
@@ -38,16 +41,31 @@ classDiagram
         + showExtraLives()
         + setCustom(spinner:JSpinner)
         + hint()
-        <<implements ControllerToViewGUI>>
     }
+    ViewGUI --|> ControllerToViewGUI
+    ViewGUI ..> ViewGUIToController             %% callback / uses
 
     %% ───────── Swing frames (views) ─────────
-    class ViewStartFrame      <<JFrame>>
-    class ViewGameTilesFrame  <<JFrame>>
-    class ViewEndFrame        <<JFrame>>
-    class ViewPopupHelp       <<JFrame>>
+   class ViewStartFrame
+    class ViewGameTilesFrame
+    class ViewEndFrame
+    class ViewPopupHelp
+    <<JFrame>> ViewStartFrame
+    <<JFrame>> ViewGameTilesFrame
+    <<JFrame>> ViewEndFrame
+    <<JFrame>> ViewPopupHelp
 
-    %% ───────── Listener classes ─────────
+    ViewGUI --> ViewStartFrame
+    ViewGUI --> ViewGameTilesFrame
+    ViewGUI --> ViewEndFrame
+    ViewGUI --> ViewPopupHelp
+
+    ViewStartFrame      --> ViewGUI
+    ViewGameTilesFrame  --> ViewGUI
+    ViewEndFrame        --> ViewGUI
+    ViewPopupHelp       --> ViewGUI
+
+    %% ───────── Listener (Observer) classes ─────────
     class ViewButtonClickListener
     class ViewCheckBoxListener
     class ViewMenuListener
@@ -57,31 +75,16 @@ classDiagram
     class ViewTimerActionListener
     class ViewHintListener
 
+    ViewButtonClickListener   --> ViewGUI
+    ViewCheckBoxListener      --> ViewGUI
+    ViewMenuListener          --> ViewGUI
+    ViewMouseListener         --> ViewGUI
+    ViewRadioButtonListener   --> ViewGUI
+    ViewSpinnerListener       --> ViewGUI
+    ViewHintListener          --> ViewGUI
+    ViewTimerActionListener   --> ViewGameTilesFrame
+
     %% ─────────── Relationships ──────────
     Controller  ..>  ControllerToModel
     Controller  ..>  ControllerToViewGUI
-    Controller  --|> ViewGUIToController
-
-    Model       --|> ControllerToModel
-    ViewGUI     --|> ControllerToViewGUI
-    ViewGUI     ..>  ViewGUIToController
-
-    ViewGUI     -->  ViewStartFrame
-    ViewGUI     -->  ViewGameTilesFrame
-    ViewGUI     -->  ViewEndFrame
-    ViewGUI     -->  ViewPopupHelp
-
-    ViewStartFrame      -->  ViewGUI
-    ViewGameTilesFrame  -->  ViewGUI
-    ViewEndFrame        -->  ViewGUI
-    ViewPopupHelp       -->  ViewGUI
-
-    ViewButtonClickListener    -->  ViewGUI
-    ViewCheckBoxListener       -->  ViewGUI
-    ViewMenuListener           -->  ViewGUI
-    ViewMouseListener          -->  ViewGUI
-    ViewRadioButtonListener    -->  ViewGUI
-    ViewSpinnerListener        -->  ViewGUI
-    ViewHintListener           -->  ViewGUI
-    ViewTimerActionListener    -->  ViewGameTilesFrame
 ```
