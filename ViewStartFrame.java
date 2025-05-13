@@ -41,6 +41,8 @@ public class ViewStartFrame extends JFrame{
     private final int frameHeight = 500;
     private ViewGUI myView;
 
+    private JCheckBox logicalMode;
+
     private JRadioButton one; //1 extra life
     private JRadioButton two; //2 extra lives
     private JRadioButton three; //3 extra lives
@@ -231,6 +233,12 @@ public class ViewStartFrame extends JFrame{
     //add check box(es) and accompanying buttons ("Extra Lives") to this frame
     private void addCheckBoxes()
     {
+        logicalMode = createCheckBox("Logical Mode (no random guessing)",
+                KeyEvent.VK_M,   // mnemonic: Alt+M
+                false);          // not selected by default
+        if (myView != null)
+            logicalMode.addItemListener(new ViewCheckBoxListener(myView));
+
         JCheckBox extralives = createCheckBox("Extra Lives",KeyEvent.VK_L,false);
         if(myView!=null)
             extralives.addItemListener(new ViewCheckBoxListener(myView));
@@ -250,6 +258,7 @@ public class ViewStartFrame extends JFrame{
 
         JPanel checkboxpanel = new JPanel();
         checkboxpanel.setLayout(new BoxLayout(checkboxpanel,BoxLayout.Y_AXIS));
+        checkboxpanel.add(logicalMode);
         checkboxpanel.add(extralives);
         checkboxpanel.add(one);
         checkboxpanel.add(two);

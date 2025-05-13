@@ -17,6 +17,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.Timer;
+import javax.swing.SwingUtilities;
+
 //represent a frame for the actual game of minesweeper
 public class ViewGameTilesFrame extends JFrame{
 
@@ -24,6 +26,7 @@ public class ViewGameTilesFrame extends JFrame{
     private final int topHeight = 100; //height for the top of the game
     //where extralives, time passed, mines left are put
 
+    private JButton aiBtn;
     private JButton hintBtn;
     private JPanel hudPanel;
     private ViewGUI view;
@@ -86,7 +89,17 @@ public class ViewGameTilesFrame extends JFrame{
         hintBtn.addActionListener(new ViewHintListener(view));   // use the existing ‘view’
         hudPanel.add(hintBtn);                                   // add to the HUD strip
 
+        aiBtn = new JButton("AI solver");
+        aiBtn.setForeground(Color.GREEN);
+        aiBtn.addActionListener(e -> {
+            System.out.println("[UI]  AI‑solver button pressed");   //  ← must print!
+            view.autoSolve();                                       //  ← existing call
+        });
 
+        hudPanel.add(aiBtn);
+
+        SwingUtilities.invokeLater(() ->
+                aiBtn.setVisible(view.isLogicalMode()));
         timer.start();
     }
 
@@ -94,6 +107,12 @@ public class ViewGameTilesFrame extends JFrame{
         JButton b = buttons[row][col];
         b.setText("F");
         b.setForeground(Color.BLUE);
+    }
+
+    public void markMineGreen(int r,int c){
+        JButton b = buttons[r][c];
+        b.setText("F");
+        b.setForeground(Color.GREEN);
     }
 
     //create and return the menu bar for the game

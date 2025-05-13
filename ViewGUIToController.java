@@ -33,5 +33,11 @@ public interface ViewGUIToController {
 
     /** Current number of flagged squares (for the Mines-Left HUD). */
     int  getNumFlags();
+
+    void setLogicalMode(boolean logical);
+    int[] nextLogicalMine();
+    boolean[][] getExposed();
+    void propagateLogicalConsequences();
+    java.util.List<int[]> flagIsolatedMines();
 }
 

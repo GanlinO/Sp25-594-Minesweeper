@@ -217,5 +217,23 @@ public class Controller implements ViewGUIToController{
         return myModel.getNumFlags();
     }
 
+    public void setLogicalMode(boolean logical){
+        myModel.setLogicalMode(logical);        // pass straight to model
+    }
+    public int[] nextLogicalMine(){
+        return myModel.nextLogicalMine();
+    }
+    public boolean[][] getExposed(){
+        return myModel.getExposed();
+    }
+
+    public void propagateLogicalConsequences() {
+        myModel.propagateLogicalConsequences();
+    }
+
+    public java.util.List<int[]> flagIsolatedMines() {
+        return myModel.flagIsolatedMines();
+    }
+
 }
 

@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JSpinner;
+import javax.swing.SwingUtilities;
 
 public class ViewGUI implements ControllerToViewGUI{
 
@@ -39,11 +40,14 @@ public class ViewGUI implements ControllerToViewGUI{
     private ViewGameTilesFrame gameframe;
     private ViewEndFrame endframe;
 
+    private boolean logicalMode = false;
+    public void setLogicalMode(boolean b){ logicalMode = b; }
 
     public ViewGUI(ViewGUIToController c)
     {
         myController = c;
     }
+    public boolean isLogicalMode(){ return logicalMode; }
 
     //start the logic (start frame for settings)
     public void go(ArrayList<String> diffs)
@@ -132,6 +136,7 @@ public class ViewGUI implements ControllerToViewGUI{
             gameframe.dispose();
         if(myController==null)
             System.exit(NULL_EXIT_CODE);
+        myController.setLogicalMode(logicalMode);
         boolean success = myController.startGame();
         if(!success)
         {
@@ -139,9 +144,19 @@ public class ViewGUI implements ControllerToViewGUI{
         }
         else
         {
-            if(startframe!=null)
-                startframe.dispose();
-            gameframe = new ViewGameTilesFrame(this,myController.getGrid(),myController.getNumMines());
+                       if (startframe != null) startframe.dispose();
+
+                                gameframe = new ViewGameTilesFrame(
+                                        this,
+                                        myController.getGrid(),
+                                        myController.getNumMines());
+
+                                /* logical-mode => reveal the pre-expanded front immediately */
+                                        if (logicalMode) {
+                            gameframe.refresh(
+                                            myController.getExposed(),
+                                            myController.getEmptyTileString());
+                        }
         }
     }
 
@@ -267,6 +282,73 @@ public class ViewGUI implements ControllerToViewGUI{
 
         if (myController.playerWon()) endGame(true);   // trigger normal win flow
     }
+
+    public void autoSolve() {
+        System.out.println("autoSolve() invoked – logicalMode = " + logicalMode);
+        if (!logicalMode) return;                 // guard clause
+
+        new Thread(() -> {                        // run off the EDT
+            myController.propagateLogicalConsequences();     // first wave
+
+            System.out.printf(
+                    "[autoSolve] after first propagate   won=%s  lost=%s  flags=%d  exposed=%d%n",
+                    myController.playerWon(),
+                    myController.playerLost(),
+                    myController.getNumFlags(),
+                    myController.getExposed()==null ? -1
+                            : myController.getExposed().length);
+
+            while (!myController.playerWon() && !myController.playerLost()) {
+
+                int[] m = myController.nextLogicalMine();    // deterministic pick
+                if (m == null) break;                        // nothing certain left
+
+                int r = m[0], c = m[1];
+
+                /* 1️⃣ visualise the flag                       */
+                SwingUtilities.invokeLater(() ->
+                        gameframe.markMineGreen(r, c));
+
+                /* 2️⃣ mutate the model                         */
+                myController.placeFlag(true, r, c);           // +1 flag
+                myController.propagateLogicalConsequences();  // cascade opens
+
+                /* 3️⃣ repaint board & HUD                      */
+                SwingUtilities.invokeLater(() -> {
+                    gameframe.refresh(myController.getExposed(),
+                            myController.getEmptyTileString());
+                    gameframe.updateMinesLeft(
+                            myController.getNumMines() - myController.getNumFlags());
+                });
+
+                pause(350);                                   // small breathing space
+            }
+
+            /* make sure the very last model state is shown */
+            SwingUtilities.invokeLater(() ->
+                    gameframe.refresh(myController.getExposed(),
+                            myController.getEmptyTileString()));
+
+            java.util.List<int[]> extra =
+                    myController.flagIsolatedMines();        // model step
+
+            SwingUtilities.invokeLater(() -> {               // paint green F
+                for (int[] p : extra)
+                    gameframe.markMineGreen(p[0], p[1]);
+                gameframe.updateMinesLeft(
+                        myController.getNumMines() - myController.getNumFlags());
+            });
+
+            /* if that solved the board, pop up the normal win panel */
+            if (myController.playerWon()) {
+                SwingUtilities.invokeLater(() -> endGame(true));
+            }
+
+        }).start();
+    }
+
+
+    private static void pause(long ms){ try{ Thread.sleep(ms);}catch(Exception e){} }
 
     private void endGame(boolean won) {
         if (gameframe == null) return;

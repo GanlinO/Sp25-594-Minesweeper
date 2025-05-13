@@ -2,11 +2,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 //keep track of most of the data in the minesweeper program
-public class Model implements ControllerToModel{
+public class Model implements ControllerToModel {
     //constants for the game: may have to change View constants, too,
     //if these are to be changed (or add more get functions to get
     //these values to the View)
-    private final ArrayList<String> DIFFICULTIES = new ArrayList<String>(Arrays.asList("beginner","intermediate","expert","custom"));
+    private final ArrayList<String> DIFFICULTIES = new ArrayList<String>(Arrays.asList("beginner", "intermediate", "expert", "custom"));
     private final int BEGINNERMINES = 10;
     private final int INTERMEDIATEMINES = 40;
     private final int EXPERTMINES = 99;
@@ -30,23 +30,24 @@ public class Model implements ControllerToModel{
     private int numberRows;
     private int numberCols;
     private int extraLivesLeft; //starts with value -1
+    private boolean logicalMode = false;
 
     //helps determine if a tile with a number is being pressed for the
     //first time, or if it is being pressed for autocompletion
-    private int [][] timesNumberPressed;
+    private int[][] timesNumberPressed;
     //helps keep track of which tiles the user can see the values of
     private boolean[][] exposedTiles;
     //keeps track of the values of the tiles on the grid
     //(actual placements of mines, empties, numbers)
-    private String [][] actualGrid;
+    private String[][] actualGrid;
     //keeps track of the locations of the mines in this grid corresponding
     //to actualGrid
-    private int[] [] mineLocations;
+    private int[][] mineLocations;
     //keeps track of the mines the user hit but did not flag
     //used mostly with extra lives, starts as [[-1,-1],[-1,-1],[-1,-1]]
     private int[][] minesHit;
     //keeps track of which tiles the user flagged
-    private boolean [][] flaggedTiles;
+    private boolean[][] flaggedTiles;
     //keeps track of the button that was last revealed/pressed by the user
     //starts with values [-1,-1]
     private int[] lastpressed;
@@ -56,8 +57,7 @@ public class Model implements ControllerToModel{
     //random generator (based on the time) to generate the grid of tiles
     private Random randgen;
 
-    public Model()
-    {
+    public Model() {
         randgen = new Random(System.currentTimeMillis());
         numberMines = BEGINNERMINES;
         numberRows = 9;
@@ -73,17 +73,18 @@ public class Model implements ControllerToModel{
         extraLivesLeft = -1;
 
         minesHit = new int[3][2];
-        minesHit[0][0] = lastpressed[0];  minesHit[0][1] = lastpressed[1];
-        minesHit[1][0] = lastpressed[0];  minesHit[1][1] = lastpressed[1];
-        minesHit[2][0] = lastpressed[0];  minesHit[2][1] = lastpressed[1];
+        minesHit[0][0] = lastpressed[0];
+        minesHit[0][1] = lastpressed[1];
+        minesHit[1][0] = lastpressed[0];
+        minesHit[1][1] = lastpressed[1];
+        minesHit[2][0] = lastpressed[0];
+        minesHit[2][1] = lastpressed[1];
     }
 
-    public void setDifficulty(String diff)
-    {
-        if(diff==null)
+    public void setDifficulty(String diff) {
+        if (diff == null)
             System.exit(NULL_EXIT_CODE);
-        switch(diff)
-        {
+        switch (diff) {
             case "beginner":
                 numberMines = BEGINNERMINES;
                 numberRows = 9;
@@ -113,30 +114,36 @@ public class Model implements ControllerToModel{
         }
     }
 
+    @Override
+    public void setLogicalMode(boolean b) {
+        logicalMode = b;
+    }
+
+    @Override
+    public boolean getLogicalMode() {
+        return logicalMode;
+    }
+
     //user wants to play a custom game, change rows
-    public void setCustomRows(int rows)
-    {
-        if(rows>=2 && rows<=30)
+    public void setCustomRows(int rows) {
+        if (rows >= 2 && rows <= 30)
             customRows = rows;
     }
 
     //user wants to play a custom game, change cols
-    public void setCustomColumns(int cols)
-    {
-        if(cols>=2 && cols<=30)
+    public void setCustomColumns(int cols) {
+        if (cols >= 2 && cols <= 30)
             customCols = cols;
     }
 
     //user wants to play a custom game, change mines
-    public void setCustomMines(int mines)
-    {
-        if(mines>=1 && mines<=150)
+    public void setCustomMines(int mines) {
+        if (mines >= 1 && mines <= 150)
             customMines = mines;
     }
 
     //play another game, reset game data
-    public void resetGame()
-    {
+    public void resetGame() {
         //another game being played
         gamesPlayed += 1;
 
@@ -159,9 +166,12 @@ public class Model implements ControllerToModel{
         lost = false;
         extraLivesLeft = -1;
         minesHit = new int[3][2];
-        minesHit[0][0] = lastpressed[0];  minesHit[0][1] = lastpressed[1];
-        minesHit[1][0] = lastpressed[0];  minesHit[1][1] = lastpressed[1];
-        minesHit[2][0] = lastpressed[0];  minesHit[2][1] = lastpressed[1];
+        minesHit[0][0] = lastpressed[0];
+        minesHit[0][1] = lastpressed[1];
+        minesHit[1][0] = lastpressed[0];
+        minesHit[1][1] = lastpressed[1];
+        minesHit[2][0] = lastpressed[0];
+        minesHit[2][1] = lastpressed[1];
 
         //reset custom
         customMines = 10;
@@ -169,79 +179,70 @@ public class Model implements ControllerToModel{
         customCols = 9;
     }
 
-    public int getNumMines()
-    {
+    public int getNumMines() {
         return numberMines;
     }
 
-    public boolean [][] getExposed()
-    {
-        if(exposedTiles==null)
+    public boolean[][] getExposed() {
+        if (exposedTiles == null)
             System.exit(NULL_EXIT_CODE);
         return exposedTiles;
     }
 
-    public int[] getLastPressed()
-    {
-        if(lastpressed==null)
+    public int[] getLastPressed() {
+        if (lastpressed == null)
             System.exit(NULL_EXIT_CODE);
         return lastpressed;
     }
 
     //user wants to change the number of extra lives
-    public void setExtraLives(int lives)
-    {
-        if(extraLivesLeft<=3 && extraLivesLeft>=-1)
+    public void setExtraLives(int lives) {
+        if (extraLivesLeft <= 3 && extraLivesLeft >= -1)
             extraLivesLeft = lives;
     }
 
-    public String getBestTimes()
-    {
+    public String getBestTimes() {
         String str = "";
-        if(difficultyIndex == 0 || bestTimeSecondsBeg>0)
-            str += ("Beginner best time: "+ bestTimeSecondsBeg+ " seconds\n" );
-        if(difficultyIndex == 1 || bestTimeSecondsInter>0)
-            str += ("Intermediate best time: "+ bestTimeSecondsInter+ " seconds\n" );
-        if(difficultyIndex == 2 || bestTimeSecondsExpert>0)
-            str += ("Expert best time: "+ bestTimeSecondsExpert+ " seconds\n" );
-        if(difficultyIndex == 3 || bestTimeSecondsCustom>0)
-            str += ("Custom best time: "+ bestTimeSecondsCustom+ " seconds\n" );
+        if (difficultyIndex == 0 || bestTimeSecondsBeg > 0)
+            str += ("Beginner best time: " + bestTimeSecondsBeg + " seconds\n");
+        if (difficultyIndex == 1 || bestTimeSecondsInter > 0)
+            str += ("Intermediate best time: " + bestTimeSecondsInter + " seconds\n");
+        if (difficultyIndex == 2 || bestTimeSecondsExpert > 0)
+            str += ("Expert best time: " + bestTimeSecondsExpert + " seconds\n");
+        if (difficultyIndex == 3 || bestTimeSecondsCustom > 0)
+            str += ("Custom best time: " + bestTimeSecondsCustom + " seconds\n");
 
         return str;
     }
 
-    public int getExtraLivesLeft()
-    {
+    public int getExtraLivesLeft() {
         return extraLivesLeft;
     }
 
-    public String [][] getGrid()
-    {
-        if(actualGrid==null)
+    public String[][] getGrid() {
+        if (actualGrid == null)
             System.exit(NULL_EXIT_CODE);
         return actualGrid;
     }
 
-    public boolean startGame()
-    {
-        if(numberRows>=2 && numberRows<=30 && numberCols<=30 &&
-                numberCols>=2 && numberMines>=1 && numberMines<=150
-                && (numberRows*numberCols)>numberMines)
-        {
-            timesNumberPressed = new int [numberRows][numberCols];
-            for(int i=0; i<numberRows;i++)
-                for(int j=0;j<numberCols;j++)
+    public boolean startGame() {
+        if (numberRows >= 2 && numberRows <= 30 && numberCols <= 30 &&
+                numberCols >= 2 && numberMines >= 1 && numberMines <= 150
+                && (numberRows * numberCols) > numberMines) {
+            timesNumberPressed = new int[numberRows][numberCols];
+            for (int i = 0; i < numberRows; i++)
+                for (int j = 0; j < numberCols; j++)
                     timesNumberPressed[i][j] = 0;
 
-            flaggedTiles = new boolean [numberRows][numberCols];
-            for(int i=0; i<numberRows;i++)
-                for(int j=0;j<numberCols;j++)
+            flaggedTiles = new boolean[numberRows][numberCols];
+            for (int i = 0; i < numberRows; i++)
+                for (int j = 0; j < numberCols; j++)
                     flaggedTiles[i][j] = false;
 
             //set default for all tiles to be not exposed
             exposedTiles = new boolean[numberRows][numberCols];
-            for(int i=0; i<numberRows;i++)
-                for(int j=0;j<numberCols;j++)
+            for (int i = 0; i < numberRows; i++)
+                for (int j = 0; j < numberCols; j++)
                     exposedTiles[i][j] = false;
 
             //populate grid with mines in unique locations
@@ -249,42 +250,147 @@ public class Model implements ControllerToModel{
 
             //populate grid with numbers relating to mines
             populateGridNumbers();
+
+            /* ───────────────── LOGICAL-MODE GUARANTEE ─────────────── */
+            if (logicalMode) {
+
+                int boardsTried = 0;                              // how many mine-layouts
+                outer:
+                while (++boardsTried <= 500) {             // ← try ≤ 500 boards
+
+                    /* ========== ①  collect all connected zero-regions ========== */
+                    java.util.List<java.util.List<int[]>> regions = new java.util.ArrayList<>();
+                    boolean[][] seen = new boolean[numberRows][numberCols];
+
+                    for (int r = 0; r < numberRows; r++) {
+                        for (int c = 0; c < numberCols; c++) {
+                            if (!seen[r][c] && actualGrid[r][c].equals(EMPTY)) {
+
+                                java.util.List<int[]> block = new java.util.ArrayList<>();
+                                java.util.ArrayDeque<int[]> q = new java.util.ArrayDeque<>();
+                                q.add(new int[]{r, c});
+                                seen[r][c] = true;
+
+                                while (!q.isEmpty()) {
+                                    int[] p = q.remove();
+                                    block.add(p);
+                                    for (int dr = -1; dr <= 1; dr++)
+                                        for (int dc = -1; dc <= 1; dc++) {
+                                            if ((dr | dc) == 0) continue;
+                                            int nr = p[0] + dr, nc = p[1] + dc;
+                                            if (nr < 0 || nr >= numberRows ||
+                                                    nc < 0 || nc >= numberCols) continue;
+                                            if (!seen[nr][nc] &&
+                                                    actualGrid[nr][nc].equals(EMPTY)) {
+                                                seen[nr][nc] = true;
+                                                q.add(new int[]{nr, nc});
+                                            }
+                                        }
+                                }
+                                regions.add(block);
+                            }
+                        }
+                    }
+                    regions.sort((a, b) -> b.size() - a.size());      // largest first
+
+                    /* ========== ②  try every zero-region on THIS board ========= */
+                    int blockIdx = 0;
+                    for (java.util.List<int[]> block : regions) {
+                        blockIdx++;
+
+                        /* fresh masks for this attempt */
+                        for (boolean[] row : exposedTiles) java.util.Arrays.fill(row, false);
+                        for (boolean[] row : flaggedTiles) java.util.Arrays.fill(row, false);
+                        timesNumberPressed = new int[numberRows][numberCols];
+                        won = lost = false;
+
+                        int[] seed = block.get(0);                    // any zero in region
+                        fillOutTiles(true, seed[0], seed[1]);         // one click → flood
+
+                        /* abort this block if the flood touched a mine */
+                        boolean mineRevealed = false;
+                        for (int m = 0; m < numberMines && !mineRevealed; m++)
+                            if (exposedTiles[mineLocations[0][m]][mineLocations[1][m]])
+                                mineRevealed = true;
+
+                        /* ---- DEBUG: result after flood ---- */
+                        System.out.printf(
+                                "[Logical-mode] board %3d block %3d size %2d  floodExposed=%3d  mineRevealed=%s%n",
+                                boardsTried, blockIdx, block.size(), countTrue(exposedTiles), mineRevealed);
+                        /* ----------------------------------- */
+
+                        if (mineRevealed) continue;                   // next region
+
+                        boolean[][] firstView = deepCopy(exposedTiles);   // save flood
+
+                        boolean solved = logicalSolve();                  // deterministic step
+
+                        /* ---- DEBUG: solver outcome ---- */
+                        System.out.printf("                → solver=%s  flags=%2d  finalExposed=%3d%n",
+                                solved, countTrue(flaggedTiles), countTrue(exposedTiles));
+                        /* ------------------------------- */
+
+                        if (solved) {
+                            /* keep only the initial flood for the user */
+                            exposedTiles = firstView;
+                            for (boolean[] row : flaggedTiles) java.util.Arrays.fill(row, false);
+
+                            won = false;
+                            lost = false;
+
+                            timesNumberPressed = new int[numberRows][numberCols];
+
+                            System.out.printf(
+                                    "✔ logical board chosen after %d layouts (block size %d)%n",
+                                    boardsTried, block.size());
+                            break outer;                                // done!
+                        }
+                    }
+
+                    /* ========== ③  none of the blocks worked → new layout ====== */
+                    populateGridWithMines();
+                    populateGridNumbers();
+                }
+
+                /* --------- report if we never found a solvable board --------- */
+                if (!won) {
+                    System.out.println("✘  gave up making an AI-solvable start – showing empty grid");
+                    System.out.printf("   exposed=%d  flags=%d%n", countTrue(exposedTiles), countTrue(flaggedTiles));
+                }
+            }
+            /* ───────────────────────────────────────────────────────── */
+
+
             return true;
-        }
-        else
+        } else
             return false;
     }
 
     //populate grid with mines in unique locations
-    private void populateGridWithMines()
-    {
+    private void populateGridWithMines() {
         actualGrid = new String[numberRows][numberCols];
-        for(int i=0;i<numberRows;i++)
-            for(int j=0;j<numberCols;j++)
+        for (int i = 0; i < numberRows; i++)
+            for (int j = 0; j < numberCols; j++)
                 actualGrid[i][j] = EMPTY;
 
         mineLocations = new int[2][numberMines];
         int curRow;
         int curCol;
-        for(int i=0;i<numberMines;i++)
-        {
+        for (int i = 0; i < numberMines; i++) {
             boolean found;
-            do
-            {
+            do {
                 found = false;
 
                 curRow = randgen.nextInt(numberRows);
                 curCol = randgen.nextInt(numberCols);
 
-                for(int j = 0;j<i;j++)
-                {
-                    if(curRow==mineLocations[0][j] && curCol==mineLocations[1][j])
-                    {
+                for (int j = 0; j < i; j++) {
+                    if (curRow == mineLocations[0][j] && curCol == mineLocations[1][j]) {
                         found = true;
                         break;
                     }
                 }
-            }while(found);
+            } while (found);
             mineLocations[0][i] = curRow;
             mineLocations[1][i] = curCol;
             actualGrid[curRow][curCol] = MINE;
@@ -294,20 +400,16 @@ public class Model implements ControllerToModel{
 
     //once mines are set in the grid, put in the numbers corresponding to
     //how many mines surround that tile
-    private void populateGridNumbers()
-    {
-        if(actualGrid==null)
+    private void populateGridNumbers() {
+        if (actualGrid == null)
             System.exit(NULL_EXIT_CODE);
-        for(int i =0;i<numberRows;i++)
-        {
-            for(int j=0; j<numberCols;j++)
-            {
-                if(!actualGrid[i][j].equals(MINE))
-                {
+        for (int i = 0; i < numberRows; i++) {
+            for (int j = 0; j < numberCols; j++) {
+                if (!actualGrid[i][j].equals(MINE)) {
                     //each tile either empty or mine so far
-                    int num = getNumberOfMines(i,j);
-                    if(num>0)
-                        actualGrid[i][j] = ""+num;
+                    int num = getNumberOfMines(i, j);
+                    if (num > 0)
+                        actualGrid[i][j] = "" + num;
                 }
             }
         }
@@ -315,107 +417,96 @@ public class Model implements ControllerToModel{
 
     //given the tile in this row and this col, return the number of mines
     //surrounding it
-    private int getNumberOfMines(int row, int col)
-    {
-        if(row==0)//row on edge of table
+    private int getNumberOfMines(int row, int col) {
+        if (row == 0)//row on edge of table
         {
-            if(col==0)//check [0][1],[1][1],[1][0] for mines
-                return isMine(0,1)+isMine(1,1)+isMine(1,0);
-            else if(col==numberCols-1) //check [0][numberCols-2],[1][numberCols-2],[1][numberCols-1]
-                return isMine(0,numberCols-2)+isMine(1,numberCols-2)+isMine(1,numberCols-1);
+            if (col == 0)//check [0][1],[1][1],[1][0] for mines
+                return isMine(0, 1) + isMine(1, 1) + isMine(1, 0);
+            else if (col == numberCols - 1) //check [0][numberCols-2],[1][numberCols-2],[1][numberCols-1]
+                return isMine(0, numberCols - 2) + isMine(1, numberCols - 2) + isMine(1, numberCols - 1);
             else //col is not on edge: check all but top 3
-                return isMine(0,col-1)+isMine(0,col+1)+isMine(1,col-1)+
-                        isMine(1,col)+isMine(1,col+1);
-        }
-        else if(row==numberRows-1)//row,col on edge of table
+                return isMine(0, col - 1) + isMine(0, col + 1) + isMine(1, col - 1) +
+                        isMine(1, col) + isMine(1, col + 1);
+        } else if (row == numberRows - 1)//row,col on edge of table
         {
-            if(col==0)//check [numberRows-2][0],[numberRows-2][1],[numberRows-1][1]
-                return isMine(numberRows-2,0)+isMine(numberRows-2,1)+isMine(numberRows-1,1);
-            else if(col==numberCols-1)//check [numberRows-2][numberCols-1],[numberRows-2][numberCols-2],[numberRows-1][numbercols-2]
-                return isMine(numberRows-2,numberCols-1)+isMine(numberRows-2,numberCols-2)+
-                        isMine(numberRows-1,numberCols-2);
+            if (col == 0)//check [numberRows-2][0],[numberRows-2][1],[numberRows-1][1]
+                return isMine(numberRows - 2, 0) + isMine(numberRows - 2, 1) + isMine(numberRows - 1, 1);
+            else if (col == numberCols - 1)//check [numberRows-2][numberCols-1],[numberRows-2][numberCols-2],[numberRows-1][numbercols-2]
+                return isMine(numberRows - 2, numberCols - 1) + isMine(numberRows - 2, numberCols - 2) +
+                        isMine(numberRows - 1, numberCols - 2);
             else//check all but bottom 3
-                return isMine(numberRows-1,col-1)+isMine(numberRows-1,col+1)+
-                        isMine(numberRows-2,col-1)+
-                        isMine(numberRows-2,col)+isMine(numberRows-2,col+1);
-        }
-        else if(col==0) //row is not on edge of table
+                return isMine(numberRows - 1, col - 1) + isMine(numberRows - 1, col + 1) +
+                        isMine(numberRows - 2, col - 1) +
+                        isMine(numberRows - 2, col) + isMine(numberRows - 2, col + 1);
+        } else if (col == 0) //row is not on edge of table
             //check all but left 3
-            return isMine(row-1,col)+isMine(row+1,col)+isMine(row-1,col+1)+
-                    isMine(row,col+1)+isMine(row+1,col+1);
-        else if(col == numberCols-1) //row is not on edge of table
+            return isMine(row - 1, col) + isMine(row + 1, col) + isMine(row - 1, col + 1) +
+                    isMine(row, col + 1) + isMine(row + 1, col + 1);
+        else if (col == numberCols - 1) //row is not on edge of table
             //check all but right 3
-            return isMine(row-1,numberCols-1)+isMine(row+1,numberCols-1)+
-                    isMine(row-1,numberCols-2)+
-                    isMine(row,numberCols-2)+isMine(row+1,numberCols-2);
+            return isMine(row - 1, numberCols - 1) + isMine(row + 1, numberCols - 1) +
+                    isMine(row - 1, numberCols - 2) +
+                    isMine(row, numberCols - 2) + isMine(row + 1, numberCols - 2);
         else //not on edge of table
         {
-            return isMine(row-1,col-1)+isMine(row-1,col)+isMine(row-1,col+1)+
-                    isMine(row,col-1)+isMine(row,col+1)+
-                    isMine(row+1,col-1)+isMine(row+1,col)+isMine(row+1,col+1);
+            return isMine(row - 1, col - 1) + isMine(row - 1, col) + isMine(row - 1, col + 1) +
+                    isMine(row, col - 1) + isMine(row, col + 1) +
+                    isMine(row + 1, col - 1) + isMine(row + 1, col) + isMine(row + 1, col + 1);
         }
     }
 
     //return 1 if tile at row,col is a mine, 0 otherwise
-    private int isMine(int row, int col)
-    {
-        if(actualGrid==null)
+    private int isMine(int row, int col) {
+        if (actualGrid == null)
             System.exit(NULL_EXIT_CODE);
-        if(actualGrid[row][col].equals(MINE))
+        if (actualGrid[row][col].equals(MINE))
             return 1;
         else
             return 0;
     }
 
     //if flagged == true, tile at row,col has been flagged; if false, unflagged
-    public void tileFlagged(boolean flagged,int row, int col)
-    {
-        if(flaggedTiles==null)
+    public void tileFlagged(boolean flagged, int row, int col) {
+        if (flaggedTiles == null)
             System.exit(NULL_EXIT_CODE);
         flaggedTiles[row][col] = flagged;
 //        debugPrintState("tileFlagged @ (" + row + "," + col + ")");
     }
 
-    public ArrayList<String> getDifficulties()
-    {
-        if(DIFFICULTIES==null)
+    public ArrayList<String> getDifficulties() {
+        if (DIFFICULTIES == null)
             System.exit(NULL_EXIT_CODE);
         return DIFFICULTIES;
     }
 
     //returns true if player lost, false otherwise
-    public boolean playerLost()
-    {
+    public boolean playerLost() {
         return lost;
     }
 
     //returns true if player won, false otherwise
     //need playerLost and playerWon b/c the player could do either
     //or neither (not both)
-    public boolean playerWon()
-    {
+    public boolean playerWon() {
         return won;
     }
 
-    public long getTotalGamesPlayed()
-    {
+    public long getTotalGamesPlayed() {
         return gamesPlayed;
     }
 
-    public long getTotalGamesWon()
-    {
+    public long getTotalGamesWon() {
         return gamesWon;
     }
 
     //return true if tile at row,col is a mine that was previously hit
     //return false otherwise
-    private boolean minePreviouslyHit(int row, int col)
-    {
-        if(minesHit==null)
+    private boolean minePreviouslyHit(int row, int col) {
+        if (minesHit == null)
             System.exit(NULL_EXIT_CODE);
-        if( (minesHit[0][0] == row && minesHit[0][1] == col) ||
-                (minesHit[1][0]==row && minesHit[1][1]==col) ||
-                (minesHit[2][0]==row && minesHit[2][1]==col) )
+        if ((minesHit[0][0] == row && minesHit[0][1] == col) ||
+                (minesHit[1][0] == row && minesHit[1][1] == col) ||
+                (minesHit[2][0] == row && minesHit[2][1] == col))
             return true;
         else
             return false;
@@ -425,31 +516,28 @@ public class Model implements ControllerToModel{
     //fill in the tiles based on what was pressed
     //if the player won, update gamesWon and the best times
     //return exposedTiles
-    public boolean [][] tilePressed(int row, int col, long currentTime)
-    {
-        if(exposedTiles==null)
+    public boolean[][] tilePressed(int row, int col, long currentTime) {
+        if (exposedTiles == null)
             System.exit(NULL_EXIT_CODE);
-        fillOutTiles(true,row,col);
-        if(won)
-        {
+        fillOutTiles(true, row, col);
+        if (won) {
             gamesWon += 1;
-            switch(difficultyIndex)
-            {
+            switch (difficultyIndex) {
                 case 0:
-                    if(bestTimeSecondsBeg>currentTime || bestTimeSecondsBeg == 0)
+                    if (bestTimeSecondsBeg > currentTime || bestTimeSecondsBeg == 0)
                         bestTimeSecondsBeg = currentTime;
                     break;
                 case 1:
-                    if(bestTimeSecondsInter>currentTime || bestTimeSecondsInter == 0)
+                    if (bestTimeSecondsInter > currentTime || bestTimeSecondsInter == 0)
                         bestTimeSecondsInter = currentTime;
                     break;
                 case 2:
-                    if(bestTimeSecondsExpert>currentTime || bestTimeSecondsExpert == 0)
+                    if (bestTimeSecondsExpert > currentTime || bestTimeSecondsExpert == 0)
                         bestTimeSecondsExpert = currentTime;
                     break;
                 //custom
                 default:
-                    if(bestTimeSecondsCustom>currentTime || bestTimeSecondsCustom == 0)
+                    if (bestTimeSecondsCustom > currentTime || bestTimeSecondsCustom == 0)
                         bestTimeSecondsCustom = currentTime;
                     break;
             }
@@ -462,83 +550,74 @@ public class Model implements ControllerToModel{
     //tile needs to be filled in at row,col
     //playerPressed is true if player pressed a button to fill out tiles
     //false if auto filling out tiles
-    private void fillOutTiles(boolean playerPressed,int row, int col)
-    {
-        if(timesNumberPressed==null||minesHit==null||lastpressed==null||
-                exposedTiles==null||flaggedTiles==null||actualGrid==null)
+    private void fillOutTiles(boolean playerPressed, int row, int col) {
+        if (timesNumberPressed == null || minesHit == null || lastpressed == null ||
+                exposedTiles == null || flaggedTiles == null || actualGrid == null)
             System.exit(NULL_EXIT_CODE);
-        if(playerPressed)
-        {
+        if (playerPressed) {
             lastpressed[0] = row;
             lastpressed[1] = col;
         }
         String numbers = "12345678";
-        if(row<0||col<0||row>numberRows-1||col>numberCols-1)
+        if (row < 0 || col < 0 || row > numberRows - 1 || col > numberCols - 1)
             return;
-        if(exposedTiles[row][col] == true && !numbers.contains(actualGrid[row][col])) //already did this tile, not a number
+        if (exposedTiles[row][col] == true && !numbers.contains(actualGrid[row][col])) //already did this tile, not a number
             return;
 
         exposedTiles[row][col] = true;
 
-        if(isMine(row,col)==1 && flaggedTiles[row][col]==false) //this tile is a mine and not flagged
+        if (isMine(row, col) == 1 && flaggedTiles[row][col] == false) //this tile is a mine and not flagged
         { //if auto complete presses the mine, flag was incorrect and it is still player's fault
-            if(extraLivesLeft>0)
-            {
-                extraLivesLeft=extraLivesLeft-1;
+            if (!playerPressed) {
+                return;                 // AI uncovered a mine while auto-expanding – just ignore it
+            }
+
+            if (extraLivesLeft > 0) {
+                extraLivesLeft = extraLivesLeft - 1;
                 minesHit[extraLivesLeft][0] = row;
                 minesHit[extraLivesLeft][1] = col;
-                if(!playerPressed) //player placed incorrect flag and tried to autocomplete
+                if (!playerPressed) //player placed incorrect flag and tried to autocomplete
                 {
                     lastpressed[0] = row; //make lastpressed the position of the mine that was uncovered
                     lastpressed[1] = col;
                 }
-            }
-            else
-            {
+            } else {
                 lost = true;
-                if(!playerPressed)
-                {
+                if (!playerPressed) {
                     lastpressed[0] = row;
                     lastpressed[1] = col;
                 }
             }
 
-        }
-        else if(actualGrid[row][col].equals(EMPTY)) //if this is an empty tile
+        } else if (actualGrid[row][col].equals(EMPTY)) //if this is an empty tile
         {
             //fill out all surrounding tiles
-            for(int i = 0;i<3;i++)
-            {
-                fillOutTiles(false,row+1,col-1+i);
-                fillOutTiles(false,row,col-1+i);
-                fillOutTiles(false,row-1,col-1+i);
+            for (int i = 0; i < 3; i++) {
+                fillOutTiles(false, row + 1, col - 1 + i);
+                fillOutTiles(false, row, col - 1 + i);
+                fillOutTiles(false, row - 1, col - 1 + i);
             }
-        }
-        else if(numbers.contains(actualGrid[row][col])) //if this is a number
+        } else if (numbers.contains(actualGrid[row][col])) //if this is a number
         {
-            if(timesNumberPressed[row][col]==0) //initial hit, don't do anything
-                timesNumberPressed[row][col]=1;
+            if (timesNumberPressed[row][col] == 0) //initial hit, don't do anything
+                timesNumberPressed[row][col] = 1;
 
                 //hit again, display surrounding tiles if all "mines" flagged (corresponding to numMines)
-            else if(timesNumberPressed[row][col]==1 && playerPressed)
-            {
-                int numMines = getNumberOfMines(row,col);
+            else if (timesNumberPressed[row][col] == 1 && playerPressed) {
+                int numMines = getNumberOfMines(row, col);
                 int currentFlaggedOrHitMines = 0;
-                for(int i = 0;i<3;i++)
-                {
+                for (int i = 0; i < 3; i++) {
                     //if mine is flagged or hit - not care if it is actually a mine (&& isMine(row+1,col-1+i)==1)
-                    if(row+1<numberRows && col-1+i<numberCols &&
-                            col-1+i>=0 && (flaggedTiles[row+1][col-1+i]==true || minePreviouslyHit(row+1,col-1+i)))
-                    {
+                    if (row + 1 < numberRows && col - 1 + i < numberCols &&
+                            col - 1 + i >= 0 && (flaggedTiles[row + 1][col - 1 + i] == true || minePreviouslyHit(row + 1, col - 1 + i))) {
                         currentFlaggedOrHitMines++;
                     }
-                    if(row-1>=0 && col-1+i<numberCols &&
-                            col-1+i>=0 && (flaggedTiles[row-1][col-1+i]==true || minePreviouslyHit(row-1,col-1+i)))
-                    {
+                    if (row - 1 >= 0 && col - 1 + i < numberCols &&
+                            col - 1 + i >= 0 && (flaggedTiles[row - 1][col - 1 + i] == true || minePreviouslyHit(row - 1, col - 1 + i))) {
                         currentFlaggedOrHitMines++;
                     }
-                    if(col-1+i<numberCols && col-1+i>=0 && i!=1 &&
-                            (flaggedTiles[row][col-1+i]==true || minePreviouslyHit(row,col-1+i)))
+                    if (col - 1 + i < numberCols && col - 1 + i >= 0 && i != 1 &&
+                            (flaggedTiles[row][col - 1 + i] == true || minePreviouslyHit(row, col - 1 + i)))
                     //row,col will not be mine b/c number
                     //so just checks row,col-1 & row,col+1
                     {
@@ -547,14 +626,13 @@ public class Model implements ControllerToModel{
                 }
 
                 //display all surrounding tiles if all "mines" flagged
-                if(currentFlaggedOrHitMines>=numMines) //> just in case
+                if (currentFlaggedOrHitMines >= numMines) //> just in case
                 {
-                    for(int i = 0;i<3;i++)
-                    {
+                    for (int i = 0; i < 3; i++) {
                         //fill out all surrounding tiles
-                        fillOutTiles(false,row+1,col-1+i);
-                        fillOutTiles(false,row,col-1+i);
-                        fillOutTiles(false,row-1,col-1+i);
+                        fillOutTiles(false, row + 1, col - 1 + i);
+                        fillOutTiles(false, row, col - 1 + i);
+                        fillOutTiles(false, row - 1, col - 1 + i);
                     }
                 }
 
@@ -565,18 +643,14 @@ public class Model implements ControllerToModel{
     }
 
     //return true if user has won, false otherwise
-    private boolean allTilesFilledOut()
-    {
-        if(exposedTiles==null||flaggedTiles==null)
+    private boolean allTilesFilledOut() {
+        if (exposedTiles == null || flaggedTiles == null)
             System.exit(NULL_EXIT_CODE);
         //for each tile
-        for(int i = 0; i<numberRows;i++)
-        {
-            for(int j = 0;j<numberCols;j++)
-            {   //if the tile is not exposed
-                if(exposedTiles[i][j]==false)
-                {	//if it is not a flagged mine, return false
-                    if(flaggedTiles[i][j]==false && isMine(i,j)==0)
+        for (int i = 0; i < numberRows; i++) {
+            for (int j = 0; j < numberCols; j++) {   //if the tile is not exposed
+                if (exposedTiles[i][j] == false) {    //if it is not a flagged mine, return false
+                    if (flaggedTiles[i][j] == false && isMine(i, j) == 0)
                         return false;
                 }
             }
@@ -607,9 +681,9 @@ public class Model implements ControllerToModel{
             if (exposedNbrs < 3) continue;          //  ←  **skip this mine**
 
             // work on copies
-            boolean[][] ex   = deepCopy(exposedTiles);
-            boolean[][] flg  = deepCopy(flaggedTiles);
-            int[][]     prs  = deepCopy(timesNumberPressed);
+            boolean[][] ex = deepCopy(exposedTiles);
+            boolean[][] flg = deepCopy(flaggedTiles);
+            int[][] prs = deepCopy(timesNumberPressed);
             flg[r][c] = true;                                // pretend to flag
 
             int delta;
@@ -620,7 +694,11 @@ public class Model implements ControllerToModel{
             } while (delta > 0);
 
             int gain = countTrue(ex) - countTrue(exposedTiles);
-            if (gain > bestGain) { bestGain = gain; bestRow = r; bestCol = c; }
+            if (gain > bestGain) {
+                bestGain = gain;
+                bestRow = r;
+                bestCol = c;
+            }
         }
         return new int[]{bestRow, bestCol};
     }
@@ -641,7 +719,94 @@ public class Model implements ControllerToModel{
         return p;
     }
 
+    /**
+     * Suggests a cell that can be logically inferred to contain a mine.
+     * Uses only the information currently visible to the player.
+     *
+     * @return Coordinates [row, col] of a cell that must be a mine,
+     * or null if none can be deduced.
+     */
+    public int[] suggestCellToRevealAsMine() {
+        for (int row = 0; row < numberRows; row++) {
+            for (int col = 0; col < numberCols; col++) {
+                if (exposedTiles[row][col] && isNumeric(actualGrid[row][col])) {
+                    int number = Integer.parseInt(actualGrid[row][col]);
+                    ArrayList<int[]> hidden = hiddenNbrs(row, col);
+                    int flaggedCount = flaggedNbrs(row, col);
+
+                    // If every remaining hidden neighbour must be a mine…
+                    if (number - flaggedCount == hidden.size() && !hidden.isEmpty()) {
+                        for (int[] cell : hidden) {
+                            if (!flaggedTiles[cell[0]][cell[1]]) {
+                                return cell;          // first certain mine
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        /* subset-overlap reasoning could be added here later */
+        return null;
+    }
+
+    /**
+     * Recursively expose every square that *must* open given current flags.
+     */
+    private void expandLogically() {
+        boolean changed;
+        do {
+            changed = false;
+
+            for (int r = 0; r < numberRows; r++) {
+                for (int c = 0; c < numberCols; c++) {
+                    if (!exposedTiles[r][c] || !isNumeric(actualGrid[r][c]))
+                        continue;                                  // need a visible number
+
+                    int need = Integer.parseInt(actualGrid[r][c]);
+                    int have = flaggedNbrs(r, c);
+
+                    /* all required mines are flagged → simulate user’s 2nd-click */
+                    if (have >= need) {
+                        int before = countTrue(exposedTiles);
+
+                        /* IMPORTANT: playerPressed **must be true** here        */
+                        fillOutTiles(true, r, c);
+
+                        if (countTrue(exposedTiles) > before)
+                            changed = true;                       // keep looping
+                    }
+                }
+            }
+
+        } while (changed);
+    }
+
+    /**
+     * Runs the deterministic solver until either:
+     * • the board is fully solved  -> returns true
+     * • no further logical inferences are possible -> returns false
+     */
+    public boolean logicalSolve() {
+        expandLogically();                       // initial flood from any zeros
+
+        while (!won) {
+            int[] mine = suggestCellToRevealAsMine();
+            if (mine == null) {
+                return false;                    // logic stalled – guessing needed
+            }
+            // mark the deduced mine
+            tileFlagged(true, mine[0], mine[1]);
+            expandLogically();                   // propagate consequences
+
+            if (countFlags() == numberMines && allTilesFilledOut()) {
+                won = true;
+            }
+        }
+        return true;                             // solved without guessing
+    }
+
 // debug helper
+
     /**
      * Dumps the current contents of all per-cell arrays so that you can follow
      * how a single user action changed the model’s state.
@@ -651,7 +816,7 @@ public class Model implements ControllerToModel{
     private void debugPrintState(String tag) {
         System.out.println("\n===== " + tag + " =====");
         System.out.println("actualGrid:");
-        for (String[] r : actualGrid)   System.out.println(java.util.Arrays.toString(r));
+        for (String[] r : actualGrid) System.out.println(java.util.Arrays.toString(r));
 
         System.out.println("exposedTiles:");
         for (boolean[] r : exposedTiles) System.out.println(java.util.Arrays.toString(r));
@@ -687,13 +852,20 @@ public class Model implements ControllerToModel{
     private static boolean[][] deepCopy(boolean[][] src) {
         return java.util.Arrays.stream(src).map(boolean[]::clone).toArray(boolean[][]::new);
     }
+
     private static int[][] deepCopy(int[][] src) {
         return java.util.Arrays.stream(src).map(int[]::clone).toArray(int[][]::new);
     }
+
     private static int countTrue(boolean[][] a) {
-        int n = 0; for (boolean[] r : a) for (boolean b : r) if (b) n++; return n;
+        int n = 0;
+        for (boolean[] r : a) for (boolean b : r) if (b) n++;
+        return n;
     }
-    private int countFlags() { return countTrue(flaggedTiles); }
+
+    private int countFlags() {
+        return countTrue(flaggedTiles);
+    }
 
     /* ──────────────────────────────────────────────────────────────── */
     /*  count how many adjacent squares are flagged        */
@@ -761,6 +933,118 @@ public class Model implements ControllerToModel{
     @Override
     public int getNumFlags() {
         return countFlags();          // countFlags() helper already exists
+    }
+
+    /* ── LOGIC-AI UTILITIES ───────────────────────────────────────── */
+    private static final int[][] NBR = {
+            {-1, -1}, {-1, 0}, {-1, 1},
+            {0, -1}, {0, 1},
+            {1, -1}, {1, 0}, {1, 1}
+    };
+
+    private static boolean isValid(int r, int c, int rows, int cols) {
+        return r >= 0 && r < rows && c >= 0 && c < cols;
+    }
+
+    private static boolean isNumeric(String s) {
+        if (s == null) return false;
+        try {
+            Integer.parseInt(s);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private ArrayList<int[]> hiddenNbrs(int r, int c) {
+        ArrayList<int[]> list = new ArrayList<>();
+        for (int[] d : NBR) {
+            int nr = r + d[0], nc = c + d[1];
+            if (isValid(nr, nc, numberRows, numberCols) && !exposedTiles[nr][nc])
+                list.add(new int[]{nr, nc});
+        }
+        return list;
+    }
+
+    private int flaggedNbrs(int r, int c) {
+        int n = 0;
+        for (int[] d : NBR) {
+            int nr = r + d[0], nc = c + d[1];
+            if (isValid(nr, nc, numberRows, numberCols) && flaggedTiles[nr][nc]) n++;
+        }
+        return n;
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Let the controller/view trigger a single deterministic expansion  */
+    /*  wave after it has placed another certain flag.                    */
+    public void propagateLogicalConsequences() {
+        expandLogically();               // existing private helper
+        // update win state in case the board just solved itself
+        if (countFlags() == numberMines && allTilesFilledOut()) won = true;
+    }
+
+    private int exposedCount() {
+        return countTrue(exposedTiles);
+    }
+
+    private int flagCount() {
+        return countTrue(flaggedTiles);
+    }
+
+    /* =================================================================== */
+    /*  Called by ViewGUI.autoSolve() through the Controller:              */
+    /*  return the next certain mine, or null if logic is stalled.         */
+    public int[] nextLogicalMine() {
+
+        int[] m = suggestCellToRevealAsMine();     // <-- already implemented
+        if (m == null) {
+            System.out.println("[AI-solver] no logically certain mine found – stop");
+            return null;
+        }
+
+        System.out.printf("[AI-solver] next mine  ->  (%d,%d)%n", m[0], m[1]);
+        return m;
+    }
+
+    /**
+     * Flags every still-hidden mine whose eight neighbours are already
+     * exposed (or are mines themselves).
+     *
+     * @return list of {row,col} coordinates that were newly flagged.
+     */
+    public java.util.List<int[]> flagIsolatedMines() {
+
+        java.util.List<int[]> added = new java.util.ArrayList<>();
+
+        for (int i = 0; i < numberMines; i++) {
+            int r = mineLocations[0][i], c = mineLocations[1][i];
+            if (flaggedTiles[r][c]) continue;           // already done
+
+            boolean hiddenNeighbour = false;
+            for (int dr = -1; dr <= 1 && !hiddenNeighbour; dr++)
+                for (int dc = -1; dc <= 1; dc++) {
+                    if (dr == 0 && dc == 0) continue;
+                    int nr = r + dr, nc = c + dc;
+                    if (nr < 0 || nr >= numberRows ||
+                            nc < 0 || nc >= numberCols) continue;
+                    if (!exposedTiles[nr][nc] && isMine(nr, nc) == 0) {
+                        hiddenNeighbour = true;         // still grey square
+                        break;
+                    }
+                }
+
+            if (!hiddenNeighbour) {                    // safe to flag
+                flaggedTiles[r][c] = true;
+                added.add(new int[]{r, c});
+            }
+        }
+
+        /* update win state in case we just closed the last gap */
+        if (countFlags() == numberMines && allTilesFilledOut())
+            won = true;
+
+        return added;
     }
 
 }

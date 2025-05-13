@@ -13,10 +13,14 @@ public class ViewCheckBoxListener implements ItemListener{
     public void itemStateChanged(ItemEvent e) {
         JCheckBox box = (JCheckBox) e.getSource();
 
-        if(myView!=null)
-        {
-            if(box.getActionCommand().equals("Extra Lives"))
+        if (myView != null) {
+            if (box.getActionCommand().equals("Extra Lives")) {
                 myView.showExtraLives();
+            }
+            /* ── NEW: Logical-mode toggle ─────────────────────────── */
+            else if (box.getActionCommand().startsWith("Logical Mode")) {
+                myView.setLogicalMode(box.isSelected());
+            }
         }
     }
 }

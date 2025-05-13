@@ -56,5 +56,12 @@ public interface ControllerToModel {
     public String getBestTimes();
     public int[] applyHint();
     public int getNumFlags();
+    void setLogicalMode(boolean logical);
+    boolean getLogicalMode();
+    int[] suggestCellToRevealAsMine();
+    boolean[][] getExposed();
+    void propagateLogicalConsequences();
+    int[] nextLogicalMine();
+    java.util.List<int[]> flagIsolatedMines();
 }
 
