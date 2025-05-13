@@ -1,7 +1,13 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
-//keep track of most of the data in the minesweeper program
+
+
+/**
+ * The Model class maintains the game state and implements the core game logic for Minesweeper.
+ * Handles the creation of the mine grid, processes player actions, and determines game outcomes.
+ * Implements the ControllerToModel interface to communicate with the Controller.
+ */
 public class Model implements ControllerToModel {
     //constants for the game: may have to change View constants, too,
     //if these are to be changed (or add more get functions to get
