@@ -9,16 +9,13 @@ import java.util.Random;
  * Implements the ControllerToModel interface to communicate with the Controller.
  */
 public class Model implements ControllerToModel {
-    //constants for the game: may have to change View constants, too,
-    //if these are to be changed (or add more get functions to get
-    //these values to the View)
+// Game difficulty settings and corresponding mine counts
     private final ArrayList<String> DIFFICULTIES = new ArrayList<String>(Arrays.asList("beginner", "intermediate", "expert", "custom"));
     private final int BEGINNERMINES = 10;
     private final int INTERMEDIATEMINES = 40;
     private final int EXPERTMINES = 99;
 
-    //keep track of game data while this instance of the model is
-    //not exited
+    // Game statistics
     private static long gamesPlayed = 1;
     private static long gamesWon = 0;
     private static long bestTimeSecondsBeg = 0;
@@ -26,11 +23,12 @@ public class Model implements ControllerToModel {
     private static long bestTimeSecondsExpert = 0;
     private static long bestTimeSecondsCustom = 0;
 
-    //keeps track of custom game settings the user sets
+    // Custom game settings
     private int customMines = 10;
     private int customRows = 9;
     private int customCols = 9;
 
+    // Current game settings
     private int difficultyIndex; //beginner=0, intermediate=1, expert=2,custom=3
     private int numberMines;
     private int numberRows;
@@ -38,31 +36,21 @@ public class Model implements ControllerToModel {
     private int extraLivesLeft; //starts with value -1
     private boolean logicalMode = false;
 
-    //helps determine if a tile with a number is being pressed for the
-    //first time, or if it is being pressed for autocompletion
+    // Internal state tracking
     private int[][] timesNumberPressed;
-    //helps keep track of which tiles the user can see the values of
     private boolean[][] exposedTiles;
-    //keeps track of the values of the tiles on the grid
-    //(actual placements of mines, empties, numbers)
     private String[][] actualGrid;
-    //keeps track of the locations of the mines in this grid corresponding
-    //to actualGrid
     private int[][] mineLocations;
-    //keeps track of the mines the user hit but did not flag
-    //used mostly with extra lives, starts as [[-1,-1],[-1,-1],[-1,-1]]
     private int[][] minesHit;
-    //keeps track of which tiles the user flagged
     private boolean[][] flaggedTiles;
-    //keeps track of the button that was last revealed/pressed by the user
-    //starts with values [-1,-1]
     private int[] lastpressed;
     private boolean won;
     private boolean lost;
-
-    //random generator (based on the time) to generate the grid of tiles
     private Random randgen;
 
+    /**
+     * Constructs a new Model with default beginner settings and initializes game state.
+     */	
     public Model() {
         randgen = new Random(System.currentTimeMillis());
         numberMines = BEGINNERMINES;
@@ -86,7 +74,11 @@ public class Model implements ControllerToModel {
         minesHit[2][0] = lastpressed[0];
         minesHit[2][1] = lastpressed[1];
     }
-
+    /**
+     * Sets the game difficulty and corresponding board size and mine count.
+     *
+     * @param diff Difficulty string ("beginner", "intermediate", "expert", "custom")
+     */	
     public void setDifficulty(String diff) {
         if (diff == null)
             System.exit(NULL_EXIT_CODE);
@@ -120,35 +112,59 @@ public class Model implements ControllerToModel {
         }
     }
 
+    /**
+     * Enables or disables logical mode. In logical mode, all games are solvable without guessing.
+     *
+     * @param b True to enable logical mode, false to disable
+     */	
     @Override
     public void setLogicalMode(boolean b) {
         logicalMode = b;
     }
 
+    /**
+     * Returns whether logical mode is currently enabled.
+     *
+     * @return True if logical mode is enabled
+     */	
     @Override
     public boolean getLogicalMode() {
         return logicalMode;
     }
 
-    //user wants to play a custom game, change rows
+    /**
+     * Sets custom number of rows for a custom game configuration.
+     *
+     * @param rows Number of rows
+     */
     public void setCustomRows(int rows) {
         if (rows >= 2 && rows <= 30)
             customRows = rows;
     }
 
-    //user wants to play a custom game, change cols
+    /**
+     * Sets custom number of columns for a custom game configuration.
+     *
+     * @param cols Number of columns
+     */
     public void setCustomColumns(int cols) {
         if (cols >= 2 && cols <= 30)
             customCols = cols;
     }
 
-    //user wants to play a custom game, change mines
+    /**
+     * Sets custom number of mines for a custom game configuration.
+     *
+     * @param mines Number of mines
+     */
     public void setCustomMines(int mines) {
         if (mines >= 1 && mines <= 150)
             customMines = mines;
     }
 
-    //play another game, reset game data
+    /**
+     * Resets the game state to prepare for a new game.
+     */
     public void resetGame() {
         //another game being played
         gamesPlayed += 1;
@@ -185,28 +201,51 @@ public class Model implements ControllerToModel {
         customCols = 9;
     }
 
+    /**
+     * Returns the number of mines currently set for the game.
+     *
+     * @return Number of mines
+     */
     public int getNumMines() {
         return numberMines;
     }
 
+    /**
+     * Returns the current exposed tiles grid.
+     *
+     * @return 2D boolean array representing exposed tiles
+     */
     public boolean[][] getExposed() {
         if (exposedTiles == null)
             System.exit(NULL_EXIT_CODE);
         return exposedTiles;
     }
-
+	
+    /**
+     * Returns the coordinates of the last tile pressed.
+     *
+     * @return Integer array with row and column of last pressed tile
+     */
     public int[] getLastPressed() {
         if (lastpressed == null)
             System.exit(NULL_EXIT_CODE);
         return lastpressed;
     }
 
-    //user wants to change the number of extra lives
+    /**
+     * Sets the number of extra lives the player has.
+     *
+     * @param lives Number of extra lives
+     */
     public void setExtraLives(int lives) {
         if (extraLivesLeft <= 3 && extraLivesLeft >= -1)
             extraLivesLeft = lives;
     }
-
+    /**
+     * Returns a string representation of the best times for all difficulty levels.
+     *
+     * @return String containing best times per difficulty
+     */
     public String getBestTimes() {
         String str = "";
         if (difficultyIndex == 0 || bestTimeSecondsBeg > 0)
@@ -220,17 +259,29 @@ public class Model implements ControllerToModel {
 
         return str;
     }
-
+    /**
+     * Returns the number of extra lives remaining.
+     *
+     * @return Extra lives left
+     */
     public int getExtraLivesLeft() {
         return extraLivesLeft;
     }
-
+    /**
+     * Returns the current game grid.
+     *
+     * @return 2D array representing the game grid
+     */
     public String[][] getGrid() {
         if (actualGrid == null)
             System.exit(NULL_EXIT_CODE);
         return actualGrid;
     }
-
+    /**
+     * Initializes the game state and generates a new board based on current settings.
+     *
+     * @return True if game successfully started, false otherwise
+     */
     public boolean startGame() {
         if (numberRows >= 2 && numberRows <= 30 && numberCols <= 30 &&
                 numberCols >= 2 && numberMines >= 1 && numberMines <= 150
@@ -466,22 +517,36 @@ public class Model implements ControllerToModel {
         return DIFFICULTIES;
     }
 
-    //returns true if player lost, false otherwise
+    /**
+     * Solves the current board using only logical inference (no guessing).
+     *
+     * @return True if solved logically, false otherwise
+     */
     public boolean playerLost() {
         return lost;
     }
 
-    //returns true if player won, false otherwise
-    //need playerLost and playerWon b/c the player could do either
-    //or neither (not both)
+    /**
+     * Returns whether the player has won the game.
+     *
+     * @return True if won, false otherwise
+     */
     public boolean playerWon() {
         return won;
     }
-
+   /**
+     * Returns the total number of games played.
+     *
+     * @return Number of games played
+     */
     public long getTotalGamesPlayed() {
         return gamesPlayed;
     }
-
+   /**
+     * Returns the total number of games won.
+     *
+     * @return Number of games won
+     */
     public long getTotalGamesWon() {
         return gamesWon;
     }
@@ -691,8 +756,9 @@ public class Model implements ControllerToModel {
     }
 
     /**
-     * Flags the mine that would unlock the largest expansion wave and
-     * returns its coordinate {row,col}.  {-1,-1} if nothing left.
+     * Flags the mine that would unlock the largest expansion wave and returns its coordinate.
+     *
+     * @return Integer array with {row, col} or {-1, -1} if no hint available
      */
     public int[] applyHint() {
         int[] p = findBestMine();
@@ -736,8 +802,8 @@ public class Model implements ControllerToModel {
         return null;
     }
 
-    /**
-     * Recursively expose every square that *must* open given current flags.
+   /**
+     * Recursively exposes all cells that are logically safe based on current flags.
      */
     private void expandLogically() {
         boolean changed;
@@ -769,9 +835,9 @@ public class Model implements ControllerToModel {
     }
 
     /**
-     * Runs the deterministic solver until either:
-     * • the board is fully solved  -> returns true
-     * • no further logical inferences are possible -> returns false
+     * Solves the current board using only logical inference (no guessing).
+     *
+     * @return True if solved logically, false otherwise
      */
     public boolean logicalSolve() {
         expandLogically();                       // initial flood from any zeros
@@ -962,9 +1028,9 @@ public class Model implements ControllerToModel {
         return n;
     }
 
-    /* ------------------------------------------------------------------ */
-    /*  Let the controller/view trigger a single deterministic expansion  */
-    /*  wave after it has placed another certain flag.                    */
+    /**
+     * Propagates logical consequences of a move and updates win state if board is solved.
+     */
     public void propagateLogicalConsequences() {
         expandLogically();               // existing private helper
         // update win state in case the board just solved itself
@@ -979,15 +1045,14 @@ public class Model implements ControllerToModel {
         return countTrue(flaggedTiles);
     }
 
-    /* =================================================================== */
-    /*  Called by ViewGUI.autoSolve() through the Controller:              */
-    /*  return the next certain mine, or null if logic is stalled.         */
+  /**
+     * Returns the coordinates of the next logically deduced mine.
+     *
+     * @return Integer array {row, col} or null if logic is stalled
+     */
     public int[] nextLogicalMine() {
-        int[] m = suggestCellToRevealAsMine();     // <-- already implemented
-        if (m == null) {
-            return null;
-        }
-        return m;
+        int[] m = suggestCellToRevealAsMine();
+        return m == null ? null : m;
     }
 
     /**
