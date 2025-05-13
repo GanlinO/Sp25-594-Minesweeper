@@ -1,90 +1,91 @@
 ```mermaid
 classDiagram
-    %% ─────────── Interfaces ───────────
-    class ControllerToModel
-    class ControllerToViewGUI
-    class ViewGUIToController
-    <<interface>> ControllerToModel
-    <<interface>> ControllerToViewGUI
-    <<interface>> ViewGUIToController
 
-    %% ─────────── Core classes ─────────
-    class Controller {
-        - ControllerToModel   myModel
-        - ControllerToViewGUI myView
-        + startGame() : boolean
-        + tilePressed(r:int, c:int, t:long)
-        + placeFlag(flag:bool, r:int, c:int)
-        + reset()
-        + setDifficulty(level:String)
-    }
-    Controller --|> ViewGUIToController        %% realises interface
+%% ─────────── Interfaces ───────────
+class ControllerToModel
+class ControllerToViewGUI
+class ViewGUIToController
+<<interface>> ControllerToModel
+<<interface>> ControllerToViewGUI
+<<interface>> ViewGUIToController
 
-    class Model {
-        + startGame() : boolean
-        + tilePressed(r:int, c:int, t:long) : boolean[][]
-        + tileFlagged(flag:bool, r:int, c:int)
-        + playerLost() : boolean
-        + playerWon()  : boolean
-        + setDifficulty(level:String)
-    }
-    Model --|> ControllerToModel
+%% ─────────── Core classes ─────────
+class Controller {
+  - ControllerToModel   myModel
+  - ControllerToViewGUI myView
+  + startGame() : boolean
+  + tilePressed(r:int, c:int, t:long)
+  + placeFlag(flag:boolean, r:int, c:int)
+  + reset()
+  + setDifficulty(level:String)
+}
+Controller --|> ViewGUIToController
 
-    class ViewGUI {
-        - ViewStartFrame      startframe
-        - ViewGameTilesFrame  gameframe
-        - ViewEndFrame        endframe
-        + playGame()
-        + playAgain()
-        + exitGame()
-        + tilePressed(cmd:String)
-        + showExtraLives()
-        + setCustom(spinner:JSpinner)
-        + hint()
-    }
-    ViewGUI --|> ControllerToViewGUI
-    ViewGUI ..> ViewGUIToController             %% callback / uses
+class Model {
+  + startGame() : boolean
+  + tilePressed(r:int, c:int, t:long) : boolean[][]
+  + tileFlagged(flag:boolean, r:int, c:int)
+  + playerLost() : boolean
+  + playerWon()  : boolean
+  + setDifficulty(level:String)
+}
+Model --|> ControllerToModel
 
-    %% ───────── Swing frames (views) ─────────
-   class ViewStartFrame
-    class ViewGameTilesFrame
-    class ViewEndFrame
-    class ViewPopupHelp
-    <<JFrame>> ViewStartFrame
-    <<JFrame>> ViewGameTilesFrame
-    <<JFrame>> ViewEndFrame
-    <<JFrame>> ViewPopupHelp
+class ViewGUI {
+  - ViewStartFrame      startframe
+  - ViewGameTilesFrame  gameframe
+  - ViewEndFrame        endframe
+  + playGame()
+  + playAgain()
+  + exitGame()
+  + tilePressed(cmd:String)
+  + showExtraLives()
+  + setCustom(spinner:JSpinner)
+  + hint()
+}
+ViewGUI --|> ControllerToViewGUI
+ViewGUI ..>  ViewGUIToController
 
-    ViewGUI --> ViewStartFrame
-    ViewGUI --> ViewGameTilesFrame
-    ViewGUI --> ViewEndFrame
-    ViewGUI --> ViewPopupHelp
+%% ───────── Swing frames (views) ─────────
+class ViewStartFrame
+class ViewGameTilesFrame
+class ViewEndFrame
+class ViewPopupHelp
+<<JFrame>> ViewStartFrame
+<<JFrame>> ViewGameTilesFrame
+<<JFrame>> ViewEndFrame
+<<JFrame>> ViewPopupHelp
 
-    ViewStartFrame      --> ViewGUI
-    ViewGameTilesFrame  --> ViewGUI
-    ViewEndFrame        --> ViewGUI
-    ViewPopupHelp       --> ViewGUI
+ViewGUI --> ViewStartFrame
+ViewGUI --> ViewGameTilesFrame
+ViewGUI --> ViewEndFrame
+ViewGUI --> ViewPopupHelp
 
-    %% ───────── Listener (Observer) classes ─────────
-    class ViewButtonClickListener
-    class ViewCheckBoxListener
-    class ViewMenuListener
-    class ViewMouseListener
-    class ViewRadioButtonListener
-    class ViewSpinnerListener
-    class ViewTimerActionListener
-    class ViewHintListener
+ViewStartFrame     --> ViewGUI
+ViewGameTilesFrame --> ViewGUI
+ViewEndFrame       --> ViewGUI
+ViewPopupHelp      --> ViewGUI
 
-    ViewButtonClickListener   --> ViewGUI
-    ViewCheckBoxListener      --> ViewGUI
-    ViewMenuListener          --> ViewGUI
-    ViewMouseListener         --> ViewGUI
-    ViewRadioButtonListener   --> ViewGUI
-    ViewSpinnerListener       --> ViewGUI
-    ViewHintListener          --> ViewGUI
-    ViewTimerActionListener   --> ViewGameTilesFrame
+%% ───────── Listener (Observer) classes ─────────
+class ViewButtonClickListener
+class ViewCheckBoxListener
+class ViewMenuListener
+class ViewMouseListener
+class ViewRadioButtonListener
+class ViewSpinnerListener
+class ViewTimerActionListener
+class ViewHintListener
 
-    %% ─────────── Relationships ──────────
-    Controller  ..>  ControllerToModel
-    Controller  ..>  ControllerToViewGUI
+ViewButtonClickListener   --> ViewGUI
+ViewCheckBoxListener      --> ViewGUI
+ViewMenuListener          --> ViewGUI
+ViewMouseListener         --> ViewGUI
+ViewRadioButtonListener   --> ViewGUI
+ViewSpinnerListener       --> ViewGUI
+ViewHintListener          --> ViewGUI
+ViewTimerActionListener   --> ViewGameTilesFrame
+
+%% ─────────── Controller uses Model & View ─────────
+Controller ..> ControllerToModel
+Controller ..> ControllerToViewGUI
 ```
