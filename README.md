@@ -325,3 +325,89 @@ The AI solver uses deterministic logical rules to:
 3. Propagate consequences of each flagged mine
 4. Continue until the board is solved or no more logical deductions can be made
 
+## ClassDiagram
+%% ────────────── Core interfaces ──────────────
+class ControllerToModel  <<interface>>
+class ControllerToViewGUI  <<interface>>
+class ViewGUIToController  <<interface>>
+
+    %% ────────────── Central concrete classes ─────
+    class Controller {
+        - ControllerToModel    myModel
+        - ControllerToViewGUI  myView
+        + startGame() : boolean
+        + tilePressed(r,c,time)
+        + placeFlag(flag,r,c)
+        + reset()
+        + setDifficulty(level)
+        <<implements ViewGUIToController>>
+    }
+
+    class Model {
+        + startGame() : boolean
+        + tilePressed(r,c,time) : boolean[][]
+        + tileFlagged(flag,r,c)
+        + playerLost() : boolean
+        + playerWon()  : boolean
+        + setDifficulty(level)
+        <<implements ControllerToModel>>
+    }
+
+    class ViewGUI {
+        - ViewStartFrame      startframe
+        - ViewGameTilesFrame  gameframe
+        - ViewEndFrame        endframe
+        + playGame()
+        + playAgain()
+        + exitGame()
+        + tilePressed(cmd)
+        + showExtraLives()
+        + setCustom(spinner)
+        + hint()
+        <<implements ControllerToViewGUI>>
+    }
+
+    %% ────────────── Swing frames (Views) ─────────
+    class ViewStartFrame      <<JFrame>>
+    class ViewGameTilesFrame  <<JFrame>>
+    class ViewEndFrame        <<JFrame>>
+    class ViewPopupHelp       <<JFrame>>
+
+    %% ────────────── Listener classes  ────────────
+    class ViewButtonClickListener
+    class ViewCheckBoxListener
+    class ViewMenuListener
+    class ViewMouseListener
+    class ViewRadioButtonListener
+    class ViewSpinnerListener
+    class ViewTimerActionListener
+    class ViewHintListener
+
+    %% ────────────── Relationships ────────────────
+    Controller  ..>  ControllerToModel        : uses
+    Controller  ..>  ControllerToViewGUI      : uses
+    Controller  --|> ViewGUIToController
+
+    Model       --|> ControllerToModel
+    ViewGUI     --|> ControllerToViewGUI
+    ViewGUI     ..>  ViewGUIToController      : calls back
+
+    ViewGUI     -->  ViewStartFrame
+    ViewGUI     -->  ViewGameTilesFrame
+    ViewGUI     -->  ViewEndFrame
+    ViewGUI     -->  ViewPopupHelp
+
+    ViewStartFrame      -->  ViewGUI
+    ViewGameTilesFrame  -->  ViewGUI
+    ViewEndFrame        -->  ViewGUI
+    ViewPopupHelp       -->  ViewGUI
+
+    %% listeners observe the GUI (Observer pattern)
+    ViewButtonClickListener    -->  ViewGUI
+    ViewCheckBoxListener       -->  ViewGUI
+    ViewMenuListener           -->  ViewGUI
+    ViewMouseListener          -->  ViewGUI
+    ViewRadioButtonListener    -->  ViewGUI
+    ViewSpinnerListener        -->  ViewGUI
+    ViewHintListener           -->  ViewGUI
+    ViewTimerActionListener    -->  ViewGameTilesFrame
