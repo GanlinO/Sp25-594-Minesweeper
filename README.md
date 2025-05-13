@@ -290,11 +290,25 @@ public class Controller implements ViewGUIToController {
 * Choose to play again or exit
 
 ### Design Patterns
-The project uses the Model-View-Controller (MVC) architectural pattern:
 
-* Model: Maintains game state and logic
-* View: Presents the user interface
-* Controller: Mediates between model and view
+#### Model-View-Controller (MVC)
+| Role | Classes | Responsibility |
+|------|---------|----------------|
+| **Model** | `Model` | Stores the board, mines, timers, best-time stats; enforces all game rules. |
+| **View**  | `ViewGUI` plus helper frames (`ViewStartFrame`, `ViewGameTilesFrame`, `ViewEndFrame`, `ViewPopupHelp`) | Renders the game state and collects user input via Swing widgets. |
+| **Controller** | `Controller` | Receives UI events, calls the model, then updates the view through `ControllerToViewGUI` |
+
+MVC decouples game logic from Swing, making head-less unit testing and future UI swaps (CLI, web) straightforward.
+
+---
+
+#### Strategy
+The project varies certain behaviours at runtime rather than with `if/else` trees:
+
+* **Difficulty strategy** – `Model#setDifficulty("beginner" | "intermediate" | "expert" | "custom")` plugs different constants (rows, columns, mines) into a single board-generation algorithm.
+* **Extra-lives & logical-solver modes** – `Model#setExtraLives(int)` and `Model#setLogicalMode(boolean)` toggle alternative rule paths (life consumption, deterministic solver) without changing the click engine.
+
+Treating these rule sets as strategies keeps the core algorithms reusable and makes it easy to add new game variants.
 
 ## Implementation Notes
 ### Logical Mode
