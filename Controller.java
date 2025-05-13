@@ -1,11 +1,19 @@
 import java.util.ArrayList;
-//manages communication between the view and the model components
 
+/**
+ * Controls communication between the Model and View components.
+ * Implements ViewGUIToController interface to process requests from the View
+ * and uses ControllerToModel to interact with the Model.
+ */
 public class Controller implements ViewGUIToController{
 
     private ControllerToViewGUI myView;
     private ControllerToModel myModel;
 
+    /**
+     * Constructs a new Controller, initializing the Model and View components.
+     * Exits the application if either component cannot be created.
+     */
     public Controller()
     {
         myModel = new Model();
@@ -14,7 +22,10 @@ public class Controller implements ViewGUIToController{
             System.exit(NULL_EXIT_CODE);
     }
 
-    //start the game
+    /**
+     * Starts the game by initializing the view with available difficulties.
+     * Displays the start screen to the user.
+     */
     public void go()
     {
         if(myModel==null || myView==null)
@@ -22,7 +33,11 @@ public class Controller implements ViewGUIToController{
         myView.go(myModel.getDifficulties());
     }
 
-    //have the model set the game difficulty to the given value
+    /**
+     * Sets the difficulty level in the model.
+     *
+     * @param difficulty The difficulty level to set (beginner, intermediate, expert, or custom)
+     */
     public void setDifficulty(String difficulty)
     {
         if(myModel==null)
@@ -30,7 +45,11 @@ public class Controller implements ViewGUIToController{
         myModel.setDifficulty(difficulty);
     }
 
-    //return the preset difficulty list from the model
+    /**
+     * Retrieves available difficulty options from the model.
+     *
+     * @return ArrayList of available difficulty options
+     */
     public ArrayList<String> getDifficulties()
     {
         if(myModel==null)
@@ -38,8 +57,11 @@ public class Controller implements ViewGUIToController{
         return myModel.getDifficulties();
     }
 
-    //return the string representation for a mine tile
-    //in the game from the model
+    /**
+     * Gets the string representation of a mine tile from the model.
+     *
+     * @return String representation of a mine tile
+     */
     public String getMineString()
     {
         if(myModel==null)
@@ -47,8 +69,11 @@ public class Controller implements ViewGUIToController{
         return myModel.MINE;
     }
 
-    //the game has started
-    //tell the model that the game started and return the success code
+    /**
+     * Notifies the model that the game has started.
+     *
+     * @return boolean indicating if the game was successfully started
+     */
     public boolean startGame()
     {
         if(myModel==null)
@@ -56,7 +81,11 @@ public class Controller implements ViewGUIToController{
         return myModel.startGame();
     }
 
-    //return the number of mines from the model
+    /**
+     * Gets the total number of mines in the current game.
+     *
+     * @return Number of mines
+     */
     public int getNumMines()
     {
         if(myModel==null)
@@ -64,7 +93,11 @@ public class Controller implements ViewGUIToController{
         return myModel.getNumMines();
     }
 
-    //return the string representation for the game grid from the model
+    /**
+     * Gets the current game grid from the model.
+     *
+     * @return 2D array representing the game grid
+     */
     public String[][] getGrid()
     {
         if(myModel==null)
@@ -72,6 +105,14 @@ public class Controller implements ViewGUIToController{
         return myModel.getGrid();
     }
 
+    /**
+     * Processes a tile press at the specified coordinates.
+     * Updates the view with the exposed tiles.
+     *
+     * @param row Row index of the pressed tile
+     * @param col Column index of the pressed tile
+     * @param currentTime Current game time when the tile was pressed
+     */
     public void tilePressed(int row, int col, long currentTime)
     {
         if(myModel==null || myView==null)
@@ -79,9 +120,13 @@ public class Controller implements ViewGUIToController{
         myView.refresh(myModel.tilePressed(row,col, currentTime), myModel.EMPTY);
     }
 
-    //if flagged==true, flag has been placed at [row,col]
-    //if flagged==false, unflagged [row,col]
-    //tell the model that this has occurred
+    /**
+     * Notifies the model when a flag is placed or removed.
+     *
+     * @param flagged True if flag was placed, false if removed
+     * @param row Row index of the flagged tile
+     * @param col Column index of the flagged tile
+     */
     public void placeFlag(boolean flagged,int row, int col)
     {
         if(myModel==null)
@@ -89,8 +134,11 @@ public class Controller implements ViewGUIToController{
         myModel.tileFlagged(flagged,row, col);
     }
 
-    //return true if player lost or false if player has not lost
-    //as determined by the model
+    /**
+     * Checks if the player has lost the game.
+     *
+     * @return True if player has lost, false otherwise
+     */
     public boolean playerLost()
     {
         if(myModel==null)
@@ -98,8 +146,11 @@ public class Controller implements ViewGUIToController{
         return myModel.playerLost();
     }
 
-    //return true if player won or false if player has not won
-    //as determined by the model
+    /**
+     * Checks if the player has won the game.
+     *
+     * @return True if player has won, false otherwise
+     */
     public boolean playerWon()
     {
         if(myModel==null)
@@ -107,7 +158,9 @@ public class Controller implements ViewGUIToController{
         return myModel.playerWon();
     }
 
-    //tell model to reset the game
+    /**
+     * Tells the model to reset the game state.
+     */
     public void reset()
     {
         if(myModel==null)
@@ -115,8 +168,11 @@ public class Controller implements ViewGUIToController{
         myModel.resetGame();
     }
 
-    //return the int representation of the tile last
-    //pressed as determined by the model
+    /**
+     * Gets the coordinates of the last pressed tile.
+     *
+     * @return Array containing row and column indices of the last pressed tile
+     */
     public int[] getLastPressed()
     {
         if(myModel==null)
@@ -124,7 +180,11 @@ public class Controller implements ViewGUIToController{
         return myModel.getLastPressed();
     }
 
-    //make the model set the extra lives to the given value
+    /**
+     * Sets the number of extra lives for the current game.
+     *
+     * @param lives Number of extra lives
+     */
     public void setExtraLives(int lives)
     {
         if(myModel==null)
@@ -132,8 +192,11 @@ public class Controller implements ViewGUIToController{
         myModel.setExtraLives(lives);
     }
 
-    //return the number of extra lives left
-    //as determined by the model
+    /**
+     * Gets the number of extra lives remaining.
+     *
+     * @return Number of extra lives left
+     */
     public int getExtraLivesLeft()
     {
         if(myModel==null)
@@ -141,7 +204,11 @@ public class Controller implements ViewGUIToController{
         return myModel.getExtraLivesLeft();
     }
 
-    //get the String representation for an empty tile from model
+    /**
+     * Gets the string representation of an empty tile.
+     *
+     * @return String representation of an empty tile
+     */
     public String getEmptyTileString()
     {
         if(myModel==null)
@@ -149,7 +216,11 @@ public class Controller implements ViewGUIToController{
         return myModel.EMPTY;
     }
 
-    //set the number of rows for the custom setting to given value in model
+    /**
+     * Sets the number of rows for custom game settings.
+     *
+     * @param rows Number of rows for the custom game
+     */
     public void setCustomRows(int rows)
     {
         if(myModel==null)
@@ -157,7 +228,11 @@ public class Controller implements ViewGUIToController{
         myModel.setCustomRows(rows);
     }
 
-    //set the number of cols for the custom setting to given value in model
+    /**
+     * Sets the number of columns for custom game settings.
+     *
+     * @param cols Number of columns for the custom game
+     */
     public void setCustomColumns(int cols)
     {
         if(myModel==null)
@@ -165,7 +240,11 @@ public class Controller implements ViewGUIToController{
         myModel.setCustomColumns(cols);
     }
 
-    //set the number of mines for the custom setting to given value in model
+    /**
+     * Sets the number of mines for custom game settings.
+     *
+     * @param mines Number of mines for the custom game
+     */
     public void setCustomMines(int mines)
     {
         if(myModel==null)
@@ -173,7 +252,11 @@ public class Controller implements ViewGUIToController{
         myModel.setCustomMines(mines);
     }
 
-    //return number of total games won as determined by model
+    /**
+     * Gets the total number of games won.
+     *
+     * @return Total games won
+     */
     public long getTotalGamesWon()
     {
         if(myModel==null)
@@ -181,7 +264,11 @@ public class Controller implements ViewGUIToController{
         return myModel.getTotalGamesWon();
     }
 
-    //return number of total games played as determined by model
+    /**
+     * Gets the total number of games played.
+     *
+     * @return Total games played
+     */
     public long getTotalGamesPlayed()
     {
         if(myModel==null)
@@ -189,8 +276,11 @@ public class Controller implements ViewGUIToController{
         return  myModel.getTotalGamesPlayed();
     }
 
-    //return the string representations of the best times for the games
-    //as determined by the model
+    /**
+     * Gets the best times for all difficulty levels.
+     *
+     * @return String containing the best times information
+     */
     public String getBestTime()
     {
         if(myModel==null)
@@ -198,7 +288,11 @@ public class Controller implements ViewGUIToController{
         return myModel.getBestTimes();
     }
 
-    //get the rules for the game from the model and return
+    /**
+     * Gets the rules of the game.
+     *
+     * @return String containing the game rules
+     */
     public String getRules()
     {
         if(myModel==null)
