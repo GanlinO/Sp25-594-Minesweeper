@@ -19,29 +19,65 @@ import javax.swing.KeyStroke;
 import javax.swing.Timer;
 import javax.swing.SwingUtilities;
 
-//represent a frame for the actual game of minesweeper
+/**
+ * Main frame that displays the Minesweeper game grid.
+ * Contains the mine grid as buttons, timer, mine counter, extra lives indicator,
+ * hint button, and AI solver button.
+ */
 public class ViewGameTilesFrame extends JFrame{
 
+    /** Font size for labels and buttons */
     private final int fontSize = 18;
-    private final int topHeight = 100; //height for the top of the game
-    //where extralives, time passed, mines left are put
 
+    /** Height for the top panel containing game information */
+    private final int topHeight = 100;
+
+    /** Button for AI solver functionality */
     private JButton aiBtn;
-    private JButton hintBtn;
-    private JPanel hudPanel;
-    private ViewGUI view;
-    private JButton[][] buttons; //buttons for the tile grid
-    private int numrows; //number of rows in the grid
-    private int numcols; //number of cols in the grid
-    private int width; //width of the grid
-    private int cheight; //height of the grid
-    private JLabel minesLeft; //mines left unflagged and unhit in the grid
-    private JLabel time; //time passed so far in the game
-    private Timer timer; //has action listener to increment time every second
-    //can be stopped and started through this class
-    private JLabel extralives; //number of extra lives user has left
 
-    //given the view, actual grid of tile strings, number of mines in the grid
+    /** Button for hint functionality */
+    private JButton hintBtn;
+
+    /** Panel containing game information (mines left, time, lives) */
+    private JPanel hudPanel;
+
+    /** Reference to the main view */
+    private ViewGUI view;
+
+    /** 2D array of buttons representing the game grid */
+    private JButton[][] buttons;
+
+    /** Number of rows in the grid */
+    private int numrows;
+
+    /** Number of columns in the grid */
+    private int numcols;
+
+    /** Width of the game window */
+    private int width;
+
+    /** Height of the game window */
+    private int cheight;
+
+    /** Label displaying number of mines left */
+    private JLabel minesLeft;
+
+    /** Label displaying elapsed time */
+    private JLabel time;
+
+    /** Timer to track elapsed game time */
+    private Timer timer;
+
+    /** Label displaying number of extra lives remaining */
+    private JLabel extralives;
+
+    /**
+     * Creates a new game frame with the specified grid and number of mines.
+     *
+     * @param myView Reference to the main view
+     * @param grid 2D array of strings representing the game grid
+     * @param mines Number of mines in the game
+     */
     public ViewGameTilesFrame(ViewGUI myView,String [][] grid, int mines)
     {
         super("Minesweeper");
@@ -56,65 +92,92 @@ public class ViewGameTilesFrame extends JFrame{
             numrows = 0;
             numcols = 0;
         }
-        width = numcols*60; //arbitrary width of 60 for each tile
-        cheight = numrows*50; //arbitrary height of 50 for each tile
-        if(width<500)
-            width = 500; //minimum to fit all of top panel
+
+        // Set window dimensions based on grid size
+        width = numcols * 60; // Arbitrary width of 60 for each tile
+        cheight = numrows * 50; // Arbitrary height of 50 for each tile
+        if(width < 500)
+            width = 500; // Minimum to fit all of top panel
 
         setSize(width,cheight+topHeight);
         setLayout(new BorderLayout(10,10));
         setLocationRelativeTo(null);
 
-        //menu bar with "Game", "Help"
+        // Create menu bar with "Game", "Help"
         JMenuBar menubar = new JMenuBar();
         setJMenuBar(createMenu(menubar));
 
-        //holds the extra lives (if applicable), mines left, time passed
-        hudPanel = topPanel(mines);                 // keep a reference
+        // Create top panel with mines left, time, extra lives
+        hudPanel = topPanel(mines);
         add(hudPanel, BorderLayout.PAGE_START);
 
-        if(grid!=null)
-            add(centerPanel(grid),BorderLayout.CENTER);
+        // Create center panel with game grid buttons
+        if(grid != null)
+            add(centerPanel(grid), BorderLayout.CENTER);
 
+        // Handle window close event
         addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent windowEvent){
+            public void windowClosing(WindowEvent windowEvent) {
                 System.exit(0);
             }
         });
 
         setVisible(true);
 
+        // Add hint button
         hintBtn = new JButton("Hint");
         hintBtn.setForeground(Color.BLUE);
-        hintBtn.addActionListener(new ViewHintListener(view));   // use the existing ‘view’
-        hudPanel.add(hintBtn);                                   // add to the HUD strip
+        hintBtn.addActionListener(new ViewHintListener(view));
+        hudPanel.add(hintBtn);
 
+        // Add AI solver button
         aiBtn = new JButton("AI solver");
         aiBtn.setForeground(Color.GREEN);
         aiBtn.addActionListener(e -> {
-            view.autoSolve();                                       //  ← existing call
+            view.autoSolve();
         });
 
         hudPanel.add(aiBtn);
 
+        // Only show AI solver button in logical mode
         SwingUtilities.invokeLater(() ->
                 aiBtn.setVisible(view.isLogicalMode()));
+
+        // Start the timer
         timer.start();
     }
 
+    /**
+     * Highlights a hint by showing a blue flag on the specified tile.
+     *
+     * @param row Row index of the hint tile
+     * @param col Column index of the hint tile
+     */
     public void showHint(int row, int col) {
         JButton b = buttons[row][col];
         b.setText("F");
         b.setForeground(Color.BLUE);
     }
 
-    public void markMineGreen(int r,int c){
+    /**
+     * Marks a mine with a green flag.
+     * Used by the AI solver to indicate detected mines.
+     *
+     * @param r Row index of the mine
+     * @param c Column index of the mine
+     */
+    public void markMineGreen(int r, int c) {
         JButton b = buttons[r][c];
         b.setText("F");
         b.setForeground(Color.GREEN);
     }
 
-    //create and return the menu bar for the game
+    /**
+     * Creates and returns the menu bar for the game.
+     *
+     * @param menubar JMenuBar to populate
+     * @return Populated JMenuBar
+     */
     private JMenuBar createMenu(JMenuBar menubar)
     {
         JMenu gameSettings = new JMenu("Game");
@@ -138,7 +201,13 @@ public class ViewGameTilesFrame extends JFrame{
         return menubar;
     }
 
-    //create and return a single menu item with the given text and keyevent
+    /**
+     * Creates a menu item with the specified text and keyboard shortcut.
+     *
+     * @param text Label text for the menu item
+     * @param keyevent Keyboard shortcut key code
+     * @return Configured JMenuItem
+     */
     private JMenuItem createMenuItem(String text, int keyevent)
     {
         JMenuItem item = new JMenuItem(text);
@@ -150,14 +219,22 @@ public class ViewGameTilesFrame extends JFrame{
         return item;
     }
 
-    //assuming player has lost, set the background color of the last
-    //pressed button (which should be a mine)
+    /**
+     * Highlights the last pressed button in red when the player loses.
+     *
+     * @param lastpressed Array containing [row, col] of the last pressed tile
+     */
     public void playerLost(int[] lastpressed)
     {
         if(buttons!=null && lastpressed!=null)
             buttons[lastpressed[0]][lastpressed[1]].setBackground(Color.RED);
     }
 
+    /**
+     * Updates the extra lives display.
+     *
+     * @param lives Number of extra lives remaining
+     */
     public void updateExtraLives(int lives)
     {
         if(lives>=0&&extralives!=null) //using extralives
@@ -167,14 +244,22 @@ public class ViewGameTilesFrame extends JFrame{
         }
     }
 
-    /** Refresh the “Mines Left” label after a hint or flag change. */
+    /**
+     * Updates the mines left counter.
+     *
+     * @param remaining Number of mines remaining
+     */
     public void updateMinesLeft(int remaining) {
         if (minesLeft != null)
             minesLeft.setText("Mines Left: " + remaining);
     }
 
-    //make sure all tiles shown to user (true in exposed[][]) are displayed
-    //correctly
+    /**
+     * Updates the display to reflect the current exposed tiles.
+     *
+     * @param exposed 2D array indicating which tiles are exposed
+     * @param emptyTileText String representation of empty tiles
+     */
     public void refresh(boolean[][] exposed, String emptyTileText)
     {
         if(exposed!=null && emptyTileText!=null && buttons!=null)
@@ -197,8 +282,12 @@ public class ViewGameTilesFrame extends JFrame{
         repaint();
     }
 
-    //create and return the top panel with the number of mines left,
-    //time passed, lives left (if applicable)
+    /**
+     * Creates the top panel with game information.
+     *
+     * @param mines Number of mines in the game
+     * @return Configured JPanel
+     */
     private JPanel topPanel(int mines)
     {
         JPanel top = new JPanel();
@@ -228,7 +317,12 @@ public class ViewGameTilesFrame extends JFrame{
         return top;
     }
 
-    //create and return the center panel with the grid tiles as buttons
+    /**
+     * Creates the game grid with buttons for each tile.
+     *
+     * @param grid 2D array of strings representing the game grid
+     * @return JPanel containing the game grid
+     */
     private JPanel centerPanel(String [][] grid)
     {
         JPanel center = new JPanel();
@@ -250,7 +344,14 @@ public class ViewGameTilesFrame extends JFrame{
         return center;
     }
 
-    //create and return a single button with the given information
+    /**
+     * Creates a single button for a tile in the game grid.
+     *
+     * @param row Row index of the tile
+     * @param col Column index of the tile
+     * @param buttontext Value of the tile
+     * @return Configured JButton
+     */
     private JButton createButton(int row, int col,String buttontext)
     {
         JButton thisbutton;
@@ -262,96 +363,102 @@ public class ViewGameTilesFrame extends JFrame{
         return thisbutton;
     }
 
-    //place a flag at the given button if it is not exposed and not flagged
-    //and return true, else if the button is already flagged,
-    //unflag the button and return false, else return false
-    //(not flagged, already exposed)
-    //also update minesLeft
-    public boolean placeFlag(JButton button)
-    {
-        if(view!=null && minesLeft!=null)
-        {
+    /**
+     * Places or removes a flag on a button.
+     * Updates the mines left counter accordingly.
+     *
+     * @param button The button to flag/unflag
+     * @return True if flag was placed, false if removed or operation failed
+     */
+    public boolean placeFlag(JButton button) {
+        if(view != null && minesLeft != null) {
             String minesremain = minesLeft.getText();
             int mines = Integer.parseInt(minesremain.substring(12));
 
-            if(button.getText().equals("F"))
-            {
+            if(button.getText().equals("F")) {
+                // Already a flag - remove it
                 mines++;
                 button.setText(" ");
                 button.setBackground(null);
-                minesLeft.setText( minesremain.substring(0,12)+mines);
-                return false; //already a flag
-            }
-            else if(button.getText().equals(view.getEmptyTileString()))
-            {//cannot flag something already clicked
+                minesLeft.setText(minesremain.substring(0, 12) + mines);
+                return false;
+            } else if(button.getText().equals(view.getEmptyTileString())) {
+                // Flag the button
                 mines--;
-                button.setText("F"); //flag
+                button.setText("F");
                 button.setBackground(Color.WHITE);
-                minesLeft.setText( minesremain.substring(0,12)+ mines);
-                return true; //change to a flag
+                minesLeft.setText(minesremain.substring(0, 12) + mines);
+                return true;
             }
         }
-        return false; //not flagged
+        return false; // Not flagged
     }
 
-    //stop the timer and return the current time
-    public long stopTimer()
-    {
-        if(timer!=null&&time!=null)
-        {
+    /**
+     * Stops the timer and returns the current time.
+     *
+     * @return Current elapsed time
+     */
+    public long stopTimer() {
+        if(timer != null && time != null) {
             timer.stop();
             return Long.parseLong(time.getText());
         }
         return 0;
     }
 
-    //start the timer and return the current time
-    public long startTimer()
-    {
-        if(timer!=null&&time!=null)
-        {
+    /**
+     * Starts the timer and returns the current time.
+     *
+     * @return Current elapsed time
+     */
+    public long startTimer() {
+        if(timer != null && time != null) {
             timer.start();
             return Long.parseLong(time.getText());
         }
         return 0;
     }
 
-    //return the current time
-    public long getCurrentTime()
-    {
-        if(time!=null)
+    /**
+     * Gets the current elapsed time.
+     *
+     * @return Current elapsed time
+     */
+    public long getCurrentTime() {
+        if(time != null)
             return Long.parseLong(time.getText());
         return 0;
     }
 
-    //increment the time
-    public void incrementTime()
-    {
-        if(view!=null&&time!=null)
-        {
+    /**
+     * Increments the elapsed time by one second.
+     * Exits the game if time overflows.
+     */
+    public void incrementTime() {
+        if(view != null && time != null) {
             long curtime = Long.parseLong(time.getText());
-            if(++curtime <=0)
-            {
+            if(++curtime <= 0) {
                 view.exitGame();
-            }
-            else
-            {
-                time.setText(curtime+"");
+            } else {
+                time.setText(curtime + "");
             }
         }
     }
 
-    //tile at row,col was pressed - if it is a mine, make the button
-    //background red
-    public void pressed(int row,int col,String mine)
-    {
-        if(buttons!=null)
-        {
+    /**
+     * Highlights a tile that contains a mine when clicked.
+     *
+     * @param row Row index of the tile
+     * @param col Column index of the tile
+     * @param mine String representation of a mine tile
+     */
+    public void pressed(int row, int col, String mine) {
+        if(buttons != null) {
             JButton button = buttons[row][col];
-            String text = button.getText().substring(button.getText().length()-mine.length());
+            String text = button.getText().substring(button.getText().length() - mine.length());
             if(text.equals(mine))
                 button.setBackground(Color.RED);
         }
     }
-
 }
